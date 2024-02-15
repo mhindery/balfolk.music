@@ -6,6 +6,7 @@ from .models import Festival, Ball, Course, Event, EventDate
 from rest_framework.views import APIView
 from .api.serializers import EventSerializer
 from rest_framework.response import Response
+from django.conf import settings
 from rest_framework import status
 
 
@@ -87,11 +88,11 @@ class EventFeed(ICalFeed):
 
     def item_link(self, item: Event) -> str:
         if item.event_type == Event.Type.BALL:
-            return 'http://localhost:3000/balls/{item.id}'
+            return f'{settings.SITE_HOST}/balls/{item.id}'
         if item.event_type == Event.Type.COURSE:
-            return 'http://localhost:3000/course/{item.id}'
+            return f'{settings.SITE_HOST}/course/{item.id}'
         if item.event_type == Event.Type.FESTIVAL:
-            return 'http://localhost:3000/festival/{item.id}'
+            return f'{settings.SITE_HOST}/festival/{item.id}'
 
 
 class EventDetailFeed(EventFeed):

@@ -2,6 +2,7 @@ import arrow
 from django.db import models
 from django.utils import timezone
 import pycountry
+from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -63,7 +64,7 @@ class Event(models.Model):
         return 'https://www.creactiviste.fr/storage/2019/10/AsQueerAsFolk-1280x720.png'
 
     def ical_link(self):
-        return 'http://localhost:8000' + reverse('events:single-event-ical', kwargs={'pk': self.id})
+        return settings.SITE_HOST + reverse('events:single-event-ical', kwargs={'pk': self.id})
 
     # Location todo
     address = models.TextField(blank=True)
@@ -81,13 +82,13 @@ class Event(models.Model):
 
     def get_balfolk_music_url(self) -> str:
         if self.event_type == self.Type.FESTIVAL:
-            return f'http://localhost:3000/festivals/{self.id}'
+            return f'{settings.SITE_HOST}/festivals/{self.id}'
         if self.event_type == self.Type.BALL:
-            return f'http://localhost:3000/balls/{self.id}'
+            return f'{settings.SITE_HOST}/balls/{self.id}'
         if self.event_type == self.Type.COURSE:
-            return f'http://localhost:3000/courses/{self.id}'
+            return f'{settings.SITE_HOST}/courses/{self.id}'
 
-        return 'http://localhost:8000'
+        return settings.SITE_HOST
 
     visible = models.BooleanField(default=True)
 

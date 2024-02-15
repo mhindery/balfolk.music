@@ -349,3 +349,4 @@ SPECTACULAR_SETTINGS = {
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
+SITE_HOST = env('SITE_HOST', default='http://localhost:8000')
