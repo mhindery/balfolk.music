@@ -180,8 +180,8 @@ def create_object(entry):
 
 
 def load_data_from_folkbende():
-    start = arrow.get('2023-01-01')
-    end = arrow.get('2024-04-01')
+    start = arrow.get('2022-01-01')
+    end = arrow.get('2025-04-01')
     urls_to_do = []
     for r in arrow.Arrow.span_range('month', start, end):
         url = f'https://www.folkbalbende.be/interface/events.php?start={
