@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+Festivals
+
+{% endblock title %}
+
+{% block content %}
+<div class="container">
+
+    <h1>Festivals</h1>
+    <ul>
+        {% for festival in object_list %}
+        <li>{{ festival }}</li>
+        {% empty %}
+        <li>No festivals yet.</li>
+        {% endfor %}
+    </ul>
+
+</div>
+{% endblock content %}
