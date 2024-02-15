@@ -11,7 +11,7 @@ SECRET_KEY = env(
     default="bU5wG8Dm9qdYlroQh6IrtEaZic7yXFgyq8BAkEH6wrp9lT3jALveutaUFa1ZQznO",
 )
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["*", "localhost", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = ["* '", "localhost", "0.0.0.0", "127.0.0.1"]
 
 # CACHES
 # ------------------------------------------------------------------------------
@@ -56,8 +56,8 @@ INSTALLED_APPS += ["django_extensions"]  # noqa: F405
 # Celery
 # ------------------------------------------------------------------------------
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-always-eager
-CELERY_TASK_ALWAYS_EAGER = True
-# https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-eager-propagates
-CELERY_TASK_EAGER_PROPAGATES = True
+# CELERY_TASK_ALWAYS_EAGER = True
+# # https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-eager-propagates
+# CELERY_TASK_EAGER_PROPAGATES = True
 # Your stuff...
 # ------------------------------------------------------------------------------
