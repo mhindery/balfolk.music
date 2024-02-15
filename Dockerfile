@@ -1,4 +1,4 @@
-FROM python:3.12
+FROM python:3.12-slim 
 
 EXPOSE 80
 
@@ -7,7 +7,6 @@ WORKDIR /app
 COPY ./requirements /requirements
 
 RUN pip install --no-cache-dir --upgrade -r /requirements/production.txt
-RUN pip install --no-cache-dir --upgrade -r /requirements/local.txt
 
 COPY . /app
 
