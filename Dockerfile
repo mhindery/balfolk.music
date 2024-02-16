@@ -10,9 +10,7 @@ RUN pip install --no-cache-dir --upgrade -r /requirements/production.txt
 
 COPY . /app
 
-CMD ["uvicorn", "config.asgi:application", "--host", "0.0.0.0", "--port", "80"]
-
-# CELERY_BROKER_URL=123 uvicorn config.asgi:application --host 0.0.0.0 --port 80
+CMD DATABASE_URL=$DATABASE_URL SITE_HOST=$SITE_HOST DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY uvicorn config.asgi:application --host 0.0.0.0 --port 80
 
 # yarn run build
 # cp -r ./dist/assets/ ../../balfolk_music/static
