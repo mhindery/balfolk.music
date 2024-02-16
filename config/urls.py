@@ -10,15 +10,11 @@ from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="index.html"), name="home"),
-    path("/", TemplateView.as_view(template_name="index.html"), name="home-two"),
-    path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
-    # User management
-    path("users/", include("balfolk_music.users.urls", namespace="users")),
-    path("accounts/", include("allauth.urls")),
-    # Your stuff: custom urls includes go here
-    path("events/", include("balfolk_music.events.urls", namespace="events")),
+    # path("users/", include("balfolk_music.users.urls", namespace="users")),
+    # path("accounts/", include("allauth.urls")),
+    # path("events/", include("balfolk_music.events.urls", namespace="events")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
     # Static file serving when using Gunicorn + Uvicorn for local web socket development
