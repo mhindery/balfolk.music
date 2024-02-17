@@ -14,7 +14,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # path("users/", include("balfolk_music.users.urls", namespace="users")),
     # path("accounts/", include("allauth.urls")),
-    # path("events/", include("balfolk_music.events.urls", namespace="events")),
+    path("events/", include("balfolk_music.events.urls", namespace="events")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
     # Static file serving when using Gunicorn + Uvicorn for local web socket development
