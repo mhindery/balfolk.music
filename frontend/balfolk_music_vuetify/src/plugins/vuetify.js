@@ -5,8 +5,7 @@
  */
 
 // Styles
-// Include from cdn in index.html instead of line below
-// import '@mdi/font/css/materialdesignicons.css'
+import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 
 
