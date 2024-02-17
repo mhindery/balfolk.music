@@ -45,7 +45,23 @@ class EventSerializer(serializers.ModelSerializer[Event]):
         ]
 
 
-class FestivalSerializer(serializers.ModelSerializer[Festival]):
+class FestivalListSerializer(serializers.ModelSerializer[Festival]):
+    country_name = serializers.CharField(source='get_country_display', read_only=True)
+
+    class Meta:
+        model = Festival
+        fields = [
+            'id',
+            'start',
+            'end',
+            'name',
+            'banner_image_url',
+            'country_name',
+            'city',
+        ]
+
+
+class FestivalDetailSerializer(serializers.ModelSerializer[Festival]):
     country_code = serializers.CharField(source='country', read_only=True)
     country_name = serializers.CharField(source='get_country_display', read_only=True)
 
@@ -117,7 +133,23 @@ class CourseSerializer(serializers.ModelSerializer[Course]):
         ]
 
 
-class BallSerializer(serializers.ModelSerializer[Ball]):
+class BallListSerializer(serializers.ModelSerializer[Ball]):
+    country_name = serializers.CharField(source='get_country_display', read_only=True)
+
+    class Meta:
+        model = Ball
+        fields = [
+            'id',
+            'start',
+            'end',
+            'name',
+            'banner_image_url',
+            'country_name',
+            'city',
+        ]
+
+
+class BallDetailSerializer(serializers.ModelSerializer[Ball]):
     country_code = serializers.CharField(source='country', read_only=True)
     country_name = serializers.CharField(source='get_country_display', read_only=True)
 

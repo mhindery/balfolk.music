@@ -80,6 +80,11 @@ class Event(models.Model):
 
     event_type = models.CharField(max_length=16, choices=Type.choices, default=Type.FESTIVAL)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["event_type", "visible"]),
+        ]
+
     def get_balfolk_music_url(self) -> str:
         if self.event_type == self.Type.FESTIVAL:
             return f'{settings.SITE_HOST}/festivals/{self.id}'

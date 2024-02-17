@@ -9,7 +9,6 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="index.html"), name="home"),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # path("users/", include("balfolk_music.users.urls", namespace="users")),
@@ -59,3 +58,8 @@ if settings.DEBUG:
         import debug_toolbar
 
         urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
+
+
+urlpatterns += [
+    path("<path:resource>", TemplateView.as_view(template_name="index.html"), name="home-catchall"),
+]
