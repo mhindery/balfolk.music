@@ -61,6 +61,8 @@ STORAGES = {
     },
 }
 
+WHITENOISE_MAX_AGE = 3600 * 24
+
 # EMAIL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#default-from-email
