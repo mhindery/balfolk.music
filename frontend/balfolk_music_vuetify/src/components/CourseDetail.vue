@@ -9,7 +9,7 @@ const zoom = ref(12);
 const coordinates = ref([47.41322, -1.219482]);
 
 async function fetchObjDetailData() {
-    var response = await axios.get("http://0.0.0.0:8000/api/courses/" + props.id);
+    var response = await axios.get("/api/courses/" + props.id);
     obj.value = response.data;
     coordinates.value = [obj.value.lattitude, obj.value.longitude];
 }

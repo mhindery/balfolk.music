@@ -137,7 +137,7 @@ const search = ref('');
 
 async function fetchData() {
     loading.value = true;
-    var response = await axios.get("http://0.0.0.0:8000/api/courses/");
+    var response = await axios.get("/api/courses/");
     objects.value = response.data;
     loading.value = false;
 }

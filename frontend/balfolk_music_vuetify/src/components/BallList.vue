@@ -124,7 +124,7 @@ const loading = ref(true);
 
 async function fetchData() {
     loading.value = true;
-    var response = await axios.get("http://0.0.0.0:8000/api/balls/");
+    var response = await axios.get("/api/balls/");
     objects.value = response.data;
     loading.value = false;
 }
