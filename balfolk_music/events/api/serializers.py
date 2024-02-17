@@ -141,9 +141,7 @@ class BallListSerializer(serializers.ModelSerializer[Ball]):
         fields = [
             'id',
             'start',
-            'end',
             'name',
-            'banner_image_url',
             'country_name',
             'city',
         ]

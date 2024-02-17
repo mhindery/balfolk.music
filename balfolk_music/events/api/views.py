@@ -44,8 +44,6 @@ class BallViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
                 'id',
                 'name',
                 'start_timestamp',
-                'end_timestamp',
-                'banner_image',
                 'city', 'country',
             ).prefetch_related('dates')
         return Ball.objects.filter(visible=True).prefetch_related('dates')
