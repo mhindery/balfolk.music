@@ -158,7 +158,10 @@ STATIC_ROOT = str(BASE_DIR / "staticfiles")
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = "/assets/"
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-STATICFILES_DIRS = [str(APPS_DIR / "static"), str(APPS_DIR / ".." / "frontend" / "balfolk_music_vuetify" / "dist")]
+STATICFILES_DIRS = [
+    str(APPS_DIR / "static"),
+    str(APPS_DIR / ".." / "frontend" / "balfolk_music_vuetify" / "dist" / "assets"),
+]
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
