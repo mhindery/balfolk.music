@@ -29,3 +29,4 @@ arrow
 tenacity
 requests
 django-ical
+drf-orjson-renderer
