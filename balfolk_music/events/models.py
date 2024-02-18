@@ -32,6 +32,7 @@ class Event(models.Model):
 
     # Convenience for sorting in DB
     ending_datetime = models.DateTimeField(null=True)
+    starting_datetime = models.DateTimeField(null=True)
 
     @property
     def start(self):
@@ -170,6 +171,7 @@ class Event(models.Model):
         #         self.country = 'BEL'
         if self.id:
             self.ending_datetime = self.end
+            self.starting_datetime = self.start
         self.fill_country()
         if self.country and len(self.country) > 2:
             self.correct_country_to_alpha_2()

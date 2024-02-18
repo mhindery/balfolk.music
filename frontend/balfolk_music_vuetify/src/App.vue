@@ -31,8 +31,10 @@
           <v-list-item prepend-icon="mdi-party-popper" title="Bals" value="bals" :to="{ name: 'BallList' }"></v-list-item>
           <v-list-item prepend-icon="mdi-school" title="Courses / Workshops" value="courses_workshops"
             :to="{ name: 'CourseList' }"></v-list-item>
-            <v-list-item prepend-icon="mdi-plus-circle-outline" title="Add event" value="add_event"
-              :to="{ name: 'EventAdd' }"></v-list-item>
+            <v-list-item prepend-icon="mdi-calendar-blank" title="Calendar" value="calendar"
+              :to="{ name: 'Calendar' }"></v-list-item>
+          <v-list-item prepend-icon="mdi-plus-circle-outline" title="Add event" value="add_event"
+            :to="{ name: 'EventAdd' }"></v-list-item>
         </v-list>
       </v-navigation-drawer>
 

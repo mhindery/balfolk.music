@@ -44,6 +44,21 @@ class EventSerializer(serializers.ModelSerializer[Event]):
         ]
 
 
+class CalendarListSerializer(serializers.ModelSerializer[Event]):
+    country_code = serializers.CharField(source='country', read_only=True)
+
+    class Meta:
+        model = Event
+        fields = [
+            'id',
+            'starting_datetime',
+            'ending_datetime',
+            'name',
+            'country_code',
+            'event_type',
+        ]
+
+
 class FestivalListSerializer(serializers.ModelSerializer[Festival]):
     country_name = serializers.CharField(source='get_country_display', read_only=True)
 

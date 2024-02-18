@@ -319,7 +319,8 @@ async function submit(event) {
 
         // console.log(postData);
 
-        axios.post('http://localhost:8000/events/api/create', postData)
+        // axios.post('http://localhost:8000/events/api/create', postData)
+        axios.post('/events/api/create', postData)
             .then((response) => {
                 loading.value = false;
                 console.log(response.data);
