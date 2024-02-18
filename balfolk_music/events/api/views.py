@@ -44,8 +44,14 @@ class BallViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
                 'id',
                 'name',
                 'start_timestamp',
+                'end_timestamp',
                 'city', 'country',
-            ).prefetch_related('dates')
+            ).prefetch_related(
+                'dates'
+            ).order_by(
+                '-ending_datetime'
+            )[:300]
+            # ).order_by('id')[:100]
         return Ball.objects.filter(visible=True).prefetch_related('dates')
 
     def get_serializer_class(self):

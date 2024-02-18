@@ -1,5 +1,5 @@
 <script setup>
-const props = defineProps(['id',]);
+const props = defineProps(['id', 'apiURL']);
 
 import { ref } from 'vue';
 import axios from 'axios'
@@ -9,7 +9,8 @@ const zoom = ref(12);
 const coordinates = ref([47.41322, -1.219482]);
 
 async function fetchObjDetailData() {
-    var response = await axios.get("/api/courses/" + props.id);
+    var response = await axios.get(props.apiURL + props.id + '/');
+    // var response = await axios.get("/api/balls/" + props.id + '/');
     obj.value = response.data;
     coordinates.value = [obj.value.lattitude, obj.value.longitude];
 }
@@ -17,24 +18,23 @@ async function fetchObjDetailData() {
 // load initial data
 fetchObjDetailData()
 
+function getGoogleMapsLink(obj) {
+    if (obj.address != null) {
+        return 'https://www.google.com/maps?daddr=' + encodeURI(obj.address.replaceAll('\n', ' '))
+    }
+    return ''
+    
+}
 
 function getDayName(date) {
     return date.toLocaleDateString('en-US', { weekday: 'short' });
 }
 
-function formatEventDate(start, end) {
+function formatMultiDayEventDate(start, stop) {
     let a = new Date(start);
+    let b = new Date(stop);
 
-    return getDayName(a) + " " + a.toLocaleDateString()
-}
-
-function getEventFormattedDates(dates) {
-    let res = [];
-    for (let index = 0; index < dates.length; index++) {
-        res.push(formatEventDate(dates[index], dates[index]));
-
-    }
-    return res;
+    return getDayName(a) + " " + a.toLocaleDateString() + " " + a.toLocaleTimeString() + " -> " + getDayName(b) + " " + b.toLocaleDateString() + " " + b.toLocaleTimeString()
 }
 
 function formatLocation(obj) {
@@ -46,7 +46,6 @@ function formatLocation(obj) {
     }
     return obj.city
 }
-
 
 function getWeekdayStart(obj) {
     let date = new Date(obj.start);
@@ -60,7 +59,7 @@ function getDayOfMonthStart(obj) {
 
 function getMonthStart(obj) {
     let date = new Date(obj.start);
-    return date.toLocaleDateString('en-US', { month: 'short' });
+    return date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
 }
 
 function getYearStart(obj) {
@@ -88,14 +87,11 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
         <v-sheet rounded class="d-flex" color="grey-lighten-3">
             <v-row align="center" no-gutters>
                 <!-- Date rectangle -->
-                <v-col style="border-bottom-left-radius: 4px; border-top-left-radius: 4px; background: rgb(49 49 50);"
+                <v-col :style="{ 'background-size': 'cover', 'box-shadow': 'inset 0 0 0 2000px rgba(49, 49, 50, 0.7)', 'background-position': 'center', 'background-origin': 'border-box', 'border-bottom-left-radius': '4px', 'border-bottom-left-radius ': '4px', 'background-image': 'url(https://catamphetamine.gitlab.io/country-flag-icons/3x2/' + obj.country_code + '.svg)' }"
                     class="fill-height" cols="2">
-                    <v-row no-gutters justify="center" class="text-subtitle-2 text-grey"
-                        v-text="getWeekdayStart(obj)"></v-row>
-                    <v-row no-gutters justify="center" class="text-h5 font-weight-bold text-white"
-                        v-text="getDayOfMonthStart(obj)"></v-row>
-                    <v-row no-gutters justify="center" class="text-subtitle-1 font-weight-bold text-grey"
-                        v-text="getMonthStart(obj) + ' ' + getYearStart(obj)"></v-row>
+                    <v-row no-gutters style="line-height: 20px;height: 24px;" justify="center" class="text-subtitle-2 text-grey" v-text="getWeekdayStart(obj)"></v-row>
+                    <v-row no-gutters style="line-height: 20px;height: 24px;" justify="center" class="text-h5 font-weight-bold text-white" v-text="getDayOfMonthStart(obj)"></v-row>
+                    <v-row no-gutters style="line-height: 20px;height: 24px;" justify="center" class="text-subtitle-1 font-weight-bold text-grey" v-text="getMonthStart(obj) + ' ' + getYearStart(obj)"></v-row>
 
                 </v-col>
                 <!-- Event title -->
@@ -110,7 +106,7 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
         </v-sheet>
 
         <v-card-item>
-            <v-card-subtitle v-html="obj.event_type_display + ' by ' + obj.organizer"></v-card-subtitle>
+            <v-card-subtitle>{{ obj.event_type_display }}<span v-if="obj.organizer"> by {{ obj.organizer }}</span></v-card-subtitle>
         </v-card-item>
 
         <v-divider></v-divider>
@@ -137,9 +133,9 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
                         </v-btn>
                     </a>
                 </v-col>
-                <v-col cols="auto">
+                <v-col v-if="obj.address" cols="auto">
                     <a style="text-decoration: none; color: inherit;" target="_blank"
-                        :href="'https://www.google.com/maps?daddr=' + encodeURI(obj.address)">
+                        :href="getGoogleMapsLink(obj)">
                         <v-btn variant="text" prepend-icon="mdi-navigation">
                             <template v-slot:prepend>
                                 <v-icon></v-icon>
@@ -179,17 +175,11 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
 
         <div v-if="obj.schedule">
             <v-divider class="mx-4 mb-1"></v-divider>
-            <v-card-title><v-icon size="medium" icon="mdi-clock-outline"></v-icon> Schedule</v-card-title>
-            <v-card-text style="white-space: pre-line;" v-html="obj.schedule">
+            <v-card-title><v-icon size="medium" icon="mdi-clock-outline"></v-icon> Line-up</v-card-title>
+            <v-card-text style="white-space: pre-line;" v-html="formatMultiDayEventDate(obj.start, obj.end)">
             </v-card-text>
-        </div>
-
-        <div v-if="obj.dates">
-            <v-divider class="mx-4 mb-1"></v-divider>
-            <v-card-title><v-icon size="medium" icon="mdi-calendar"></v-icon> Dates</v-card-title>
-            <v-card-text style="white-space: pre-line;">
-                <v-list density="compact" :items="getEventFormattedDates(obj.dates)"></v-list>
-            </v-card-text>
+                <v-card-text style="white-space: pre-line;" v-html="obj.schedule">
+                </v-card-text>
         </div>
 
         <div v-if="obj.pricing">
@@ -199,27 +189,16 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
             </v-card-text>
         </div>
 
+        <div v-if="obj.address">
         <v-divider class="mx-4 mb-1"></v-divider>
         <v-card-title><v-icon size="medium" icon="mdi-map-marker"></v-icon> Location</v-card-title>
         <v-card-text style="white-space: pre-line;">
             {{ obj.address }}
-        </v-card-text>
-        <v-card-text style="white-space: pre-line;">
+            <br>
             {{ obj.country_name }}
         </v-card-text>
 
-        <v-card-text style="white-space: pre-line;">
-            <a style="text-decoration: none; color: inherit;" target="_blank"
-                :href="'https://www.google.com/maps?daddr=' + encodeURI(obj.address)">
-                <v-btn variant="outlined" prepend-icon="mdi-navigation">
-                    <template v-slot:prepend>
-                        <v-icon></v-icon>
-                    </template>
-                    Open navigation
-                </v-btn>
-            </a>
-        </v-card-text>
-
+        <div v-if="obj.longitude">
         <v-card-text>
             <div style="height:400px; width:100%">
                 <LMap ref="map" :zoom="zoom" :center="coordinates">
@@ -229,5 +208,7 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
                 </LMap>
             </div>
         </v-card-text>
+        </div>
+        </div>
     </v-card>
 </template>

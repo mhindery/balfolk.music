@@ -13,7 +13,7 @@
                 <v-container fluid>
                     <v-row dense>
                         <FestivalCard v-for="festival in get_upcoming_events(festivals)" :id="festival.id"
-                            :name="festival.name" :city="festival.city" :country_name="festival.country_name" :tagline="festival.tagline"
+                            :name="festival.name" :city="festival.city" :country_name="festival.country_name"
                             :banner_image_url="festival.banner_image_url" :start_timestamp="festival.start" :end_timestamp="festival.end" />
                     </v-row>
                 </v-container>
@@ -22,7 +22,7 @@
                 <v-container fluid>
                     <v-row dense>
                         <FestivalCard v-for="festival in get_past_events(festivals)" :id="festival.id" :name="festival.name"
-                            :city="festival.city" :country_name="festival.country_name" :tagline="festival.tagline" :image="festival.image_url"
+                            :city="festival.city" :country_name="festival.country_name" :image="festival.image_url"
                             :start_timestamp="festival.start" :end_timestamp="festival.end" />
                     </v-row>
                 </v-container>
@@ -39,6 +39,7 @@ import axios from 'axios'
 const festivals = ref([]);
 
 async function fetchFestivalListData() {
+    // var response = await axios.get("http://localhost:8000/api/festivals/");
     var response = await axios.get("/api/festivals/");
     festivals.value = response.data;
 }

@@ -30,6 +30,9 @@ class Event(models.Model):
     end_timestamp = models.TimeField()
     dates = models.ManyToManyField(EventDate)
 
+    # Convenience for sorting in DB
+    ending_datetime = models.DateTimeField(null=True)
+
     @property
     def start(self):
         dates = [x for x in self.dates.all()]
@@ -47,7 +50,6 @@ class Event(models.Model):
         return arrow.get(date.isoformat() + ' ' + self.end_timestamp.isoformat()).datetime
 
     name = models.CharField(max_length=128)
-    tagline = models.TextField(blank=True)
     description = models.TextField(blank=True)
     organizer = models.CharField(max_length=128, blank=True)
     site = models.URLField(blank=True)
@@ -72,6 +74,21 @@ class Event(models.Model):
     lattitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
     country = models.CharField(max_length=3, choices=[(x.alpha_2, x.name) for x in pycountry.countries], blank=True)
+
+    def fill_country(self):
+        if self.city and not self.country:
+            if self.city in ['Leuven', 'Gooik', 'Aalst', 'Namur', 'Namen', 'Charleroi', 'Uccle', 'Limburg', 'Kortrijk', 'Mechelen', 'Wijgmaal', 'Diest', 'Elsene', 'Belsele', 'Asse', 'Lebbeke', 'Brussels']:
+                self.country = 'BE'
+                return
+
+    def correct_country_to_alpha_2(self):
+        if self.country.lower() == 'turkey':
+            self.country = 'TR'
+            return
+
+        matches = pycountry.countries.search_fuzzy(self.country)
+        if matches:
+            self.country = matches[0].alpha_2
 
     class Type(models.TextChoices):
         FESTIVAL = "festival", _("Festival")
@@ -98,6 +115,7 @@ class Event(models.Model):
     visible = models.BooleanField(default=True)
 
     folkbende_id = models.IntegerField(blank=True, null=True)
+    balfolknl_id = models.CharField(max_length=512, blank=True, null=True)
 
     def __str__(self) -> str:
         return f'{self.get_event_type_display()}: {self.name}'
@@ -150,6 +168,11 @@ class Event(models.Model):
         #     self.fill_geo_info()
         #     if not self.country:
         #         self.country = 'BEL'
+        if self.id:
+            self.ending_datetime = self.end
+        self.fill_country()
+        if self.country and len(self.country) > 2:
+            self.correct_country_to_alpha_2()
         return super().save(*args, **kwargs)
 
 
@@ -164,8 +187,9 @@ class Festival(Event):
     class Meta:
         proxy = True
 
-    def __str__(self) -> str:
-        return f'{self.get_event_type_display()}: {self.name}'
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.event_type = self.Type.FESTIVAL
 
 
 class CourseManager(models.Manager):
@@ -175,6 +199,10 @@ class CourseManager(models.Manager):
 
 class Course(Event):
     objects = CourseManager()
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.event_type = self.Type.COURSE
 
     class Meta:
         proxy = True
@@ -187,6 +215,10 @@ class BallManager(models.Manager):
 
 class Ball(Event):
     objects = BallManager()
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.event_type = self.Type.BALL
 
     class Meta:
         proxy = True

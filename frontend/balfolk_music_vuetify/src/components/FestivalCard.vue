@@ -1,6 +1,6 @@
 
 <script setup>
-defineProps(['id', 'name', 'country_name', 'city', 'start_timestamp', 'end_timestamp', 'tagline', 'banner_image_url'])
+defineProps(['id', 'name', 'country_name', 'city', 'start_timestamp', 'end_timestamp', 'banner_image_url'])
 
 function getDayName(date) {
     return date.toLocaleDateString('en-US', { weekday: 'short' });
@@ -26,7 +26,6 @@ function formatFromTo(start, stop) {
                     <v-card-title class="text-white" v-text="name"></v-card-title>
                     <v-card-text class="text-white"
                         v-text="formatFromTo(start_timestamp, end_timestamp) + ' @ ' + city + ', ' + country_name"></v-card-text>
-                    <!-- <v-card-text class="text-white" v-text="tagline"></v-card-text> -->
                 </v-img>
             </v-card>
 

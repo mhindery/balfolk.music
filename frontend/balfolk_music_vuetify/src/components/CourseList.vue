@@ -25,16 +25,10 @@
                                     <v-sheet rounded class="d-flex" color="grey-lighten-3">
                                         <v-row align="center" no-gutters>
                                             <!-- Date rectangle -->
-                                            <v-col
-                                                style="border-bottom-left-radius: 4px; border-top-left-radius: 4px; background: rgb(49 49 50);"
-                                                class="fill-height" cols="2" md="3">
-                                                <v-row no-gutters justify="center" class="text-subtitle-2 text-grey"
-                                                    v-text="getWeekdayStart(item.raw)"></v-row>
-                                                <v-row no-gutters justify="center" class="text-h5 font-weight-bold text-white"
-                                                    v-text="getDayOfMonthStart(item.raw)"></v-row>
-                                                <v-row no-gutters justify="center" class="text-subtitle-1 font-weight-bold text-grey"
-                                                    v-text="getMonthStart(item.raw)"></v-row>
-
+                                            <v-col :style="{ 'background-size': 'cover', 'box-shadow': 'inset 0 0 0 2000px rgba(49, 49, 50, 0.7)', 'background-position': 'center', 'background-origin': 'border-box', 'border-bottom-left-radius': '4px', 'border-bottom-left-radius ': '4px', 'border-top-left-radius': '4px', 'background-image': 'url(https://catamphetamine.gitlab.io/country-flag-icons/3x2/' + item.raw.country_code + '.svg)' }" class="fill-height" cols="2" md="3">
+                                                <v-row no-gutters style="line-height: 20px;height: 22px;" justify="center" class="text-subtitle-2 text-grey-lighten-2" v-text="getWeekdayStart(item.raw)"></v-row>
+                                                <v-row no-gutters style="line-height: 20px;height: 22px;" justify="center" class="text-h5 font-weight-bold text-white" v-text="getDayOfMonthStart(item.raw)"></v-row>
+                                                <v-row no-gutters style="line-height: 20px;height: 22px;" justify="center" class="text-subtitle-1 font-weight-bold text-grey-lighten-2" v-text="getMonthStart(item.raw)"></v-row>
                                             </v-col>
                                             <!-- Event title -->
                                             <v-col>
@@ -80,16 +74,10 @@
                                     <v-sheet rounded class="d-flex" color="grey-lighten-3">
                                         <v-row align="center" no-gutters>
                                             <!-- Date rectangle -->
-                                            <v-col
-                                                style="border-bottom-left-radius: 4px; border-top-left-radius: 4px; background: rgb(49 49 50);"
-                                                class="fill-height" cols="2" md="3">
-                                                <v-row no-gutters justify="center" class="text-subtitle-2 text-grey"
-                                                    v-text="getWeekdayStart(item.raw)"></v-row>
-                                                <v-row no-gutters justify="center" class="text-h5 font-weight-bold text-white"
-                                                    v-text="getDayOfMonthStart(item.raw)"></v-row>
-                                                <v-row no-gutters justify="center" class="text-subtitle-1 font-weight-bold text-grey"
-                                                    v-text="getMonthStart(item.raw)"></v-row>
-
+                                            <v-col :style="{ 'background-size': 'cover', 'box-shadow': 'inset 0 0 0 2000px rgba(49, 49, 50, 0.7)', 'background-position': 'center', 'background-origin': 'border-box', 'border-bottom-left-radius': '4px', 'border-bottom-left-radius ': '4px', 'border-top-left-radius': '4px', 'background-image': 'url(https://catamphetamine.gitlab.io/country-flag-icons/3x2/' + item.raw.country_code + '.svg)' }" class="fill-height" cols="2" md="3">
+                                                <v-row no-gutters style="line-height: 20px;height: 22px;" justify="center" class="text-subtitle-2 text-grey-lighten-2" v-text="getWeekdayStart(item.raw)"></v-row>
+                                                <v-row no-gutters style="line-height: 20px;height: 22px;" justify="center" class="text-h5 font-weight-bold text-white" v-text="getDayOfMonthStart(item.raw)"></v-row>
+                                                <v-row no-gutters style="line-height: 20px;height: 22px;" justify="center" class="text-subtitle-1 font-weight-bold text-grey-lighten-2" v-text="getMonthStart(item.raw)"></v-row>
                                             </v-col>
                                             <!-- Event title -->
                                             <v-col>
@@ -137,6 +125,7 @@ const search = ref('');
 
 async function fetchData() {
     loading.value = true;
+    // var response = await axios.get("http://localhost:8000/api/courses/");
     var response = await axios.get("/api/courses/");
     objects.value = response.data;
     loading.value = false;
@@ -204,7 +193,7 @@ function getDayOfMonthStart(obj) {
 
 function getMonthStart(obj) {
     let date = new Date(obj.start);
-    return date.toLocaleDateString('en-US', { month: 'short' });
+    return date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
 }
 
 function formatLocation(obj) {

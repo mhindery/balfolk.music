@@ -151,7 +151,9 @@ def create_object(entry):
     event.longitude = entry['location']['address']['lng']
 
     if 'frisse folk' in event.organizer.lower():
-        event.country = 'BEL'
+        event.country = 'BE'
+    elif any(c in event.address for c in ['Gent', 'Antwerpen', 'Brussel', 'Bruxelles', 'Mechelen', 'Brugge', 'Saint-Gilles']):
+        event.country = 'BE'
 
     if entry['type'] == 'ball':
         event.event_type = Event.Type.BALL

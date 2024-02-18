@@ -22,7 +22,6 @@ class EventSerializer(serializers.ModelSerializer[Event]):
             'end_timestamp',
             'name',
             'dates',
-            'tagline',
             'description',
             'banner_image',
             'poster_image',
@@ -75,7 +74,6 @@ class FestivalDetailSerializer(serializers.ModelSerializer[Festival]):
             'start',
             'end',
             'name',
-            'tagline',
             'ical_link',
             'description',
             'banner_image_url',
@@ -112,7 +110,6 @@ class CourseSerializer(serializers.ModelSerializer[Course]):
             'end',
             'dates',
             'name',
-            'tagline',
             'description',
             'banner_image_url',
             'poster_image',
@@ -135,13 +132,16 @@ class CourseSerializer(serializers.ModelSerializer[Course]):
 
 class BallListSerializer(serializers.ModelSerializer[Ball]):
     country_name = serializers.CharField(source='get_country_display', read_only=True)
+    country_code = serializers.CharField(source='country', read_only=True)
 
     class Meta:
         model = Ball
         fields = [
             'id',
             'start',
+            'end',
             'name',
+            'country_code',
             'country_name',
             'city',
         ]
@@ -161,7 +161,6 @@ class BallDetailSerializer(serializers.ModelSerializer[Ball]):
             'start',
             'end',
             'name',
-            'tagline',
             'description',
             'banner_image_url',
             'poster_image',
