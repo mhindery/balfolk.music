@@ -11,7 +11,7 @@ from balfolk_music.events.models import Festival, Course, Event, Ball
 User = get_user_model()
 
 
-list_display = ["name", "starting_datetime", "city", "country"]
+list_display = ["name", "starting_datetime", "city", "country", 'source', 'visible']
 
 
 class EventYearFilter(admin.SimpleListFilter):

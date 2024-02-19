@@ -1,6 +1,11 @@
 
 
 <template>
+        <v-progress-linear :active="loading" color="deep-purple" height="4" indeterminate></v-progress-linear>
+
+        <!-- Search box -->
+        <v-text-field class="py-3" v-model="search" hide-details placeholder="Search" prepend-inner-icon="mdi-magnify" variant="underlined"></v-text-field>
+
         <!-- Tabs header -->
         <v-tabs v-model="tab" fixed-tabs>
             <v-tab value=upcoming>Upcoming</v-tab>
@@ -37,16 +42,20 @@ import { ref } from 'vue';
 import axios from 'axios'
 
 const festivals = ref([]);
+const loading = ref(true);
 
 async function fetchFestivalListData() {
+    loading.value = true;
     var response = await axios.get("/api/festivals/");
     festivals.value = response.data;
+    loading.value = false;
 }
 
 // load initial data
 fetchFestivalListData();
 
 const tab = ref(0);
+const search = ref('');
 
 function get_upcoming_events(festivals) {
     function is_upcoming(festival) {
