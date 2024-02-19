@@ -21,11 +21,14 @@ function formatFromTo(start, stop) {
     <v-col cols="12" md="6" lg="6">
         <router-link style="text-decoration: none; color: inherit;" :to="{ name: 'FestivalDetail', params: { id: id } }">
             <v-card variant="flat">
-                <v-img :src="banner_image_url" class="align-end" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="200px"
-                    cover>
+                <v-img :src="banner_image_url" class="align-end" gradient="to bottom, rgba(0,0,0,.3), rgba(0,0,0,.7)" height="200px"
+                    cover >
                     <v-card-title class="text-white" v-text="name"></v-card-title>
-                    <v-card-text class="text-white"
-                        v-text="formatFromTo(start_timestamp, end_timestamp) + ' @ ' + city + ', ' + country_name"></v-card-text>
+                    <v-card-text style="white-space: pre-line;" class="text-white">
+                        {{ formatFromTo(start_timestamp, end_timestamp) }}
+                        <br>
+                        {{ city }}, {{ country_name}}
+                    </v-card-text>
                 </v-img>
             </v-card>
 
