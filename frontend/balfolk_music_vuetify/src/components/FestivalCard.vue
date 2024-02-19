@@ -6,11 +6,26 @@ function getDayName(date) {
     return date.toLocaleDateString('en-US', { weekday: 'short' });
 }
 
-function formatFromTo(start, stop) {
+const dateFormat = { timeZone: 'UTC', weekday: "long", year: "numeric", month: "short", day: "numeric" };
+const timeFormat = { timeStyle: 'short' };
+
+function formatMultiDayEventDate(start, stop) {
+    if (start == undefined || stop == undefined) {
+        return '';
+    }
+    // console.log(start);
+    // console.log(stop);
     let a = new Date(start);
     let b = new Date(stop);
+    let userTimezoneOffset = a.getTimezoneOffset() * 60000;
+    // console.log(a);
+    // console.log(userTimezoneOffset);
+    a = new Date(a - userTimezoneOffset * Math.sign(userTimezoneOffset));
+    b = new Date(b - userTimezoneOffset * Math.sign(userTimezoneOffset));
+    // console.log(a);
 
-    return getDayName(a) + " " + a.toLocaleDateString() + " -> " + getDayName(b) + " " + b.toLocaleDateString()
+
+    return a.toLocaleDateString('en-us', dateFormat) + " -> " + b.toLocaleDateString('en-us', dateFormat);
 }
 
 
@@ -25,7 +40,7 @@ function formatFromTo(start, stop) {
                     cover >
                     <v-card-title class="text-white" v-text="name"></v-card-title>
                     <v-card-text style="white-space: pre-line;" class="text-white">
-                        {{ formatFromTo(start_timestamp, end_timestamp) }}
+                        {{ formatMultiDayEventDate(start_timestamp, end_timestamp) }}
                         <br>
                         {{ city }}, {{ country_name}}
                     </v-card-text>
