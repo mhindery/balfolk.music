@@ -66,8 +66,8 @@ class FestivalListSerializer(serializers.ModelSerializer[Festival]):
         model = Festival
         fields = [
             'id',
-            'start',
-            'end',
+            'starting_datetime',
+            'ending_datetime',
             'name',
             'banner_image_url',
             'country_name',
@@ -86,8 +86,8 @@ class FestivalDetailSerializer(serializers.ModelSerializer[Festival]):
         model = Festival
         fields = [
             'id',
-            'start',
-            'end',
+            'starting_datetime',
+            'ending_datetime',
             'name',
             'ical_link',
             'description',
@@ -121,8 +121,8 @@ class CourseSerializer(serializers.ModelSerializer[Course]):
         model = Course
         fields = [
             'id',
-            'start',
-            'end',
+            'starting_datetime',
+            'ending_datetime',
             'dates',
             'name',
             'description',
@@ -153,8 +153,8 @@ class BallListSerializer(serializers.ModelSerializer[Ball]):
         model = Ball
         fields = [
             'id',
-            'start',
-            'end',
+            'starting_datetime',
+            'ending_datetime',
             'name',
             'country_code',
             'country_name',
@@ -173,8 +173,8 @@ class BallDetailSerializer(serializers.ModelSerializer[Ball]):
         model = Ball
         fields = [
             'id',
-            'start',
-            'end',
+            'starting_datetime',
+            'ending_datetime',
             'name',
             'description',
             'banner_image_url',

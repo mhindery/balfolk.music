@@ -12,19 +12,28 @@ def process_entry(entry):
     event = None
 
     if entry.get('organisation', '') == 'balfolk.nl':
-        event = Event.objects.filter(balfolknl_id=entry['links'][0]).first()
-
-        if 'festival' in event.name.lower() or 'festival' in event.site.lower():
-            event.event_type = Event.Type.FESTIVAL
-        elif 'class' in event.name.lower() or 'class' in event.site.lower():
-            event.event_type = Event.Type.COURSE
+        event = Event.objects.filter(source=Event.Source.BALFOLK_NL, balfolknl_id=entry['links'][0]).first()
 
     elif any('folkbalbende' in l for l in entry['links']):
         f_id = 0
         for l in entry['links']:
             if 'folkbalbende' in l:
                 f_id = int(l.split('/')[-1])
-        event = Event.objects.filter(folkbende_id=f_id).first()
+        event = Event.objects.filter(source=Event.Source.FOLKBALBENDE, folkbende_id=f_id).first()
+
+    else:
+        event = Event.objects.filter(
+            source=Event.Source.FOLKDANCE_PAGE,
+            name=entry['name'],
+            starting_datetime=arrow.get(entry['start']).datetime,
+            ending_datetime=arrow.get(entry['end']).datetime,
+        ).first()
+
+    if event:
+        if 'festival' in event.name.lower() or 'festival' in event.site.lower() or 'festival' in entry['name'].lower():
+            event.event_type = Event.Type.FESTIVAL
+        elif 'class' in event.name.lower() or 'class' in event.site.lower() or 'class' in entry['name'].lower():
+            event.event_type = Event.Type.COURSE
 
     if not event:
         try:
@@ -35,6 +44,7 @@ def process_entry(entry):
                 event_cls = Course
 
             event = event_cls(
+                source=Event.Source.FOLKDANCE_PAGE,
                 name=entry['name'],
                 description=entry.get('details', ''),
                 pricing=entry.get('price', ''),
@@ -83,8 +93,10 @@ def process_entry(entry):
         ipdb.set_trace()
         print(e)
 
+    event.dates.clear()
     d, _ = EventDate.objects.get_or_create(date=arrow.get(entry['start']).date())
     event.dates.add(d)
+    event.save()
 
 
 def scrape_folkdance_data():

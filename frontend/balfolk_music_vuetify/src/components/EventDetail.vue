@@ -10,31 +10,45 @@ const coordinates = ref([47.41322, -1.219482]);
 
 async function fetchObjDetailData() {
     var response = await axios.get(props.apiURL + props.id + '/');
-    // var response = await axios.get("/api/balls/" + props.id + '/');
     obj.value = response.data;
     coordinates.value = [obj.value.lattitude, obj.value.longitude];
 }
 
 // load initial data
-fetchObjDetailData()
+fetchObjDetailData();
 
 function getGoogleMapsLink(obj) {
     if (obj.address != null) {
         return 'https://www.google.com/maps?daddr=' + encodeURI(obj.address.replaceAll('\n', ' '))
     }
     return ''
-    
+
 }
 
 function getDayName(date) {
     return date.toLocaleDateString('en-US', { weekday: 'short' });
 }
 
+const dateFormat = {  timeZone: 'UTC', weekday: "long", year: "numeric", month: "short", day: "numeric" };
+const timeFormat = { timeStyle: 'short'};
+
 function formatMultiDayEventDate(start, stop) {
+    if (start == undefined || stop == undefined) {
+        return '';
+    }
+    // console.log(start);
+    // console.log(stop);
     let a = new Date(start);
     let b = new Date(stop);
+    let userTimezoneOffset = a.getTimezoneOffset() * 60000;
+    // console.log(a);
+    // console.log(userTimezoneOffset);
+    a = new Date(a - userTimezoneOffset * Math.sign(userTimezoneOffset));
+    b = new Date(b - userTimezoneOffset * Math.sign(userTimezoneOffset));
+    // console.log(a);
+    
 
-    return getDayName(a) + " " + a.toLocaleDateString() + " " + a.toLocaleTimeString() + " -> " + getDayName(b) + " " + b.toLocaleDateString() + " " + b.toLocaleTimeString()
+    return a.toLocaleDateString('en-us', dateFormat) + " " + a.toLocaleTimeString('en-us', timeFormat) + " -> " + b.toLocaleDateString('en-us', dateFormat) + " " + b.toLocaleTimeString('en-us', timeFormat)
 }
 
 function formatLocation(obj) {
@@ -48,22 +62,22 @@ function formatLocation(obj) {
 }
 
 function getWeekdayStart(obj) {
-    let date = new Date(obj.start);
+    let date = new Date(obj.starting_datetime);
     return date.toLocaleDateString('en-US', { weekday: 'short' });
 }
 
 function getDayOfMonthStart(obj) {
-    let date = new Date(obj.start);
+    let date = new Date(obj.starting_datetime);
     return date.getDate();
 }
 
 function getMonthStart(obj) {
-    let date = new Date(obj.start);
+    let date = new Date(obj.starting_datetime);
     return date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
 }
 
 function getYearStart(obj) {
-    let date = new Date(obj.start);
+    let date = new Date(obj.starting_datetime);
     return date.getFullYear();
 }
 
@@ -87,11 +101,16 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
         <v-sheet rounded class="d-flex" color="grey-lighten-3">
             <v-row align="center" no-gutters>
                 <!-- Date rectangle -->
-                <v-col :style="{ 'background-size': 'cover', 'box-shadow': 'inset 0 0 0 2000px rgba(49, 49, 50, 0.7)', 'background-position': 'center', 'background-origin': 'border-box', 'border-bottom-left-radius': '4px', 'border-bottom-left-radius ': '4px', 'background-image': 'url(https://catamphetamine.gitlab.io/country-flag-icons/3x2/' + obj.country_code + '.svg)' }"
-                    class="fill-height" cols="2">
-                    <v-row no-gutters style="line-height: 20px;height: 24px;" justify="center" class="text-subtitle-2 text-grey" v-text="getWeekdayStart(obj)"></v-row>
-                    <v-row no-gutters style="line-height: 20px;height: 24px;" justify="center" class="text-h5 font-weight-bold text-white" v-text="getDayOfMonthStart(obj)"></v-row>
-                    <v-row no-gutters style="line-height: 20px;height: 24px;" justify="center" class="text-subtitle-1 font-weight-bold text-grey" v-text="getMonthStart(obj) + ' ' + getYearStart(obj)"></v-row>
+                <v-col
+                    :style="{ 'min-height': '110px', 'background-size': 'cover', 'box-shadow': 'inset 0 0 0 2000px rgba(49, 49, 50, 0.7)', 'background-position': 'center', 'background-origin': 'border-box', 'border-bottom-left-radius': '4px', 'border-bottom-left-radius ': '4px', 'background-image': 'url(https://catamphetamine.gitlab.io/country-flag-icons/3x2/' + obj.country_code + '.svg)' }"
+                    class="fill-height" cols="3" lg="2">
+                    <v-row align-self="center" no-gutters style="line-height: 48px;height: 40px;" justify="center"
+                        class="text-subtitle-2 text-grey" v-text="getWeekdayStart(obj)"></v-row>
+                    <v-row align-self="center" no-gutters style="line-height: 20px;height: 24px;" justify="center"
+                        class="text-h5 font-weight-bold text-white" v-text="getDayOfMonthStart(obj)"></v-row>
+                    <v-row align-self="center" no-gutters style="line-height: 20px;height: 24px;" justify="center"
+                        class="text-subtitle-1 font-weight-bold text-grey"
+                        v-text="getMonthStart(obj) + ' ' + getYearStart(obj)"></v-row>
 
                 </v-col>
                 <!-- Event title -->
@@ -106,7 +125,9 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
         </v-sheet>
 
         <v-card-item>
-            <v-card-subtitle>{{ obj.event_type_display }}<span v-if="obj.organizer"> by {{ obj.organizer }}</span></v-card-subtitle>
+            <v-card-subtitle>{{ obj.event_type_display }}<span v-if="obj.organizer"> by {{ obj.organizer
+            }}</span></v-card-subtitle>
+            <v-card-subtitle v-html="formatMultiDayEventDate(obj.starting_datetime, obj.ending_datetime)"></v-card-subtitle>
         </v-card-item>
 
         <v-divider></v-divider>
@@ -134,8 +155,7 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
                     </a>
                 </v-col>
                 <v-col v-if="obj.address" cols="auto">
-                    <a style="text-decoration: none; color: inherit;" target="_blank"
-                        :href="getGoogleMapsLink(obj)">
+                    <a style="text-decoration: none; color: inherit;" target="_blank" :href="getGoogleMapsLink(obj)">
                         <v-btn variant="text" prepend-icon="mdi-navigation">
                             <template v-slot:prepend>
                                 <v-icon></v-icon>
@@ -176,10 +196,7 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
         <div v-if="obj.schedule">
             <v-divider class="mx-4 mb-1"></v-divider>
             <v-card-title><v-icon size="medium" icon="mdi-clock-outline"></v-icon> Line-up</v-card-title>
-            <v-card-text style="white-space: pre-line;" v-html="formatMultiDayEventDate(obj.start, obj.end)">
-            </v-card-text>
-                <v-card-text style="white-space: pre-line;" v-html="obj.schedule">
-                </v-card-text>
+            <v-card-text style="white-space: pre-line;" v-html="obj.schedule"></v-card-text>
         </div>
 
         <div v-if="obj.pricing">
@@ -190,25 +207,24 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
         </div>
 
         <div v-if="obj.address">
-        <v-divider class="mx-4 mb-1"></v-divider>
-        <v-card-title><v-icon size="medium" icon="mdi-map-marker"></v-icon> Location</v-card-title>
-        <v-card-text style="white-space: pre-line;">
-            {{ obj.address }}
-            <br>
-            {{ obj.country_name }}
-        </v-card-text>
+            <v-divider class="mx-4 mb-1"></v-divider>
+            <v-card-title><v-icon size="medium" icon="mdi-map-marker"></v-icon> Location</v-card-title>
+            <v-card-text style="white-space: pre-line;">
+                {{ obj.address }}
+                <br>
+                {{ obj.country_name }}
+            </v-card-text>
 
-        <div v-if="obj.longitude">
-        <v-card-text>
-            <div style="height:400px; width:100%">
-                <LMap ref="map" :zoom="zoom" :center="coordinates">
-                    <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base"
-                        name="OpenStreetMap"></LTileLayer>
-                    <LMarker :lat-lng="coordinates" draggable> </LMarker>
-                </LMap>
+            <div v-if="obj.longitude">
+                <v-card-text>
+                    <div style="height:400px; width:100%">
+                        <LMap ref="map" :zoom="zoom" :center="coordinates">
+                            <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base"
+                                name="OpenStreetMap"></LTileLayer>
+                            <LMarker :lat-lng="coordinates" draggable> </LMarker>
+                        </LMap>
+                    </div>
+                </v-card-text>
             </div>
-        </v-card-text>
-        </div>
-        </div>
-    </v-card>
-</template>
+    </div>
+</v-card></template>

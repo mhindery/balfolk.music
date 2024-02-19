@@ -30,8 +30,9 @@ def get_timestamps(input_string):
 
 
 def get_entry_data(url):
-    # import ipdb
-    # ipdb.set_trace()
+    # if url == 'https://www.balfolk.nl/agenda/gratis-proefles-lochem/':
+    #     import ipdb
+    #     ipdb.set_trace()
     try:
         soup = fetch_site(url)
         meta = soup.find(class_='meta')
@@ -39,11 +40,17 @@ def get_entry_data(url):
         event_site_header = meta.find(class_='date')
         event_type = event_site_header.find('em').text.lower()
 
-        if event_type != 'bal':
+        if event_type == 'bal':
+            event_cls = Ball
+        elif event_type == 'overig':
+            event_cls = Ball
+        elif event_type == 'dansen leren':
+            event_cls = Course
+        elif event_type == 'sociales':
+            event_cls = Course
+        else:
             print(f'Skipping {event_type} ({url})')
             return
-        else:
-            event_cls = Ball
 
         date_str = event_site_header.text.split(' |')[0]
         event_date = arrow.get(date_str, 'DD-MM-YYYY').datetime
@@ -75,10 +82,19 @@ def get_entry_data(url):
         start_timestamp, end_timestamp = get_timestamps(aanvang)
 
         address = soup.find(string=re.compile('Locatie')).parent.parent.text.replace('Locatie: ', '').strip().replace(', ', '\n')
-        city = address.split('\n')[-1].split(' ')[-1]
+        if address == '\n,':
+            address = ''
+            city = ''
+        else:
+            city = address.split('\n')[-1].split(' ')[-1]
         country = 'NL'
-        lat = float(soup.find(class_="lat").get_text())
-        lng = float(soup.find(class_="lng").get_text())
+
+        if soup.find(class_="lat"):
+            lat = float(soup.find(class_="lat").get_text())
+            lng = float(soup.find(class_="lng").get_text())
+        else:
+            lat = None
+            lng = None
 
         organizer = ''
         if 'Balfolk café Nijmegen' in name:
@@ -92,9 +108,9 @@ def get_entry_data(url):
 
         pricing = soup.find(string=re.compile('Entree: ')).parent.parent.text.replace('Entree: ', '').strip()
 
-        event = event_cls.objects.filter(balfolknl_id=url).first()
+        event = event_cls.objects.filter(source=Event.Source.BALFOLK_NL, balfolknl_id=url).first()
         if not event:
-            event = event_cls(balfolknl_id=url)
+            event = event_cls(source=Event.Source.BALFOLK_NL, balfolknl_id=url)
 
         event.balfolknl_id = url
         event.site = url
@@ -116,13 +132,16 @@ def get_entry_data(url):
         event.organizer = organizer
 
         event.save()
+        event.save()
+        event.dates.clear()
         d, _ = EventDate.objects.get_or_create(date=event_date)
         event.dates.add(d)
+        event.save()
 
         print(f'Processed {event}')
     except Exception as e:
-        import ipdb
-        ipdb.set_trace()
+        # import ipdb
+        # ipdb.set_trace()
         print(url)
         print(e)
 
@@ -134,11 +153,9 @@ def get_agenda_entries() -> list[str]:
     for link in soup.find_all('a'):
         if (href := link.get('href')).startswith('https://www.balfolk.nl/agenda/'):
             if href != 'https://www.balfolk.nl/agenda/':
-                entries.append(href)
-    return entries
+                yield href
 
 
-def scrape_data():
-    entries = get_agenda_entries()
-    for entry in tqdm(entries):
+def scrape_balfolknl_data():
+    for entry in tqdm(get_agenda_entries()):
         get_entry_data(entry)

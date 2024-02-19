@@ -39,7 +39,6 @@ import axios from 'axios'
 const festivals = ref([]);
 
 async function fetchFestivalListData() {
-    // var response = await axios.get("http://localhost:8000/api/festivals/");
     var response = await axios.get("/api/festivals/");
     festivals.value = response.data;
 }

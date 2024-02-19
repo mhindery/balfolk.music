@@ -7,8 +7,9 @@ import axios from 'axios'
 
 const events = ref([]);
 const value = ref([new Date()]);
-const weekday = ref([0, 1, 2, 3, 4, 5, 6]);
+const weekday = ref([1, 2, 3, 4, 5, 6, 0]);
 const viewmode = ref("month");
+const viewmodes = ['month', 'week', 'day'];
 const loading = ref(true);
 const showAdjacent = ref(true);
 
@@ -16,10 +17,41 @@ function getColor(event) {
     if (event.event_type == "ball") {
         return "blue"
     }
-    if (event.event_type == "ball") {
+    if (event.event_type == "festival") {
         return "red"
     }
     return "green"
+}
+
+function getLink(event) {
+    if (event.event_type == "ball") {
+        return "/api/balls/" + event.id;
+    }
+    if (event.event_type == "festival") {
+        return "/api/festivals/" + event.id;
+    }
+    return "/api/courses/" + event.id;
+}
+
+function getTitle(event) {
+
+    let text = event.name + ' (' + event.country_code + ')';
+    let href = getLink(event);
+
+    return text;
+    // return '<a href="' + href + '">' + text + '</a>';
+}
+
+function getStartDate(event)  {
+    let a = new Date(event.starting_datetime);
+    let userTimezoneOffset = a.getTimezoneOffset() * 60000;
+    return new Date(a - userTimezoneOffset * Math.sign(userTimezoneOffset));
+}
+
+function getEndDate(event) {
+    let a = new Date(event.ending_datetime);
+    let userTimezoneOffset = a.getTimezoneOffset() * 60000;
+    return new Date(a - userTimezoneOffset * Math.sign(userTimezoneOffset));
 }
 
 async function getEvents(start, end) {
@@ -27,15 +59,14 @@ async function getEvents(start, end) {
     // console.log(end)
 
     loading.value = true;
-    // var response = await axios.get("http://localhost:8000/api/calendar_events/");
     var response = await axios.get("/api/calendar_events/");
     // console.log(response)
 
     response.data.forEach(element => {
         events.value.push({
-            title: element.name,
-            start: new Date(element.starting_datetime),
-            end: new Date(element.ending_datetime),
+            title: getTitle(element),
+            start: getStartDate(element),
+            end: getEndDate(element),
             color: getColor(element),
             // color: this.colors[this.rnd(0, this.colors.length - 1)],
             allDay: false,
@@ -53,6 +84,21 @@ getEvents(1, 2)
 </script>
 
 <template>
+        <v-sheet
+          tile
+          height="54"
+          class="d-flex"
+        >
+          <v-select
+            v-model="viewmode"
+            :items="viewmodes"
+            dense
+            variant="outlined"
+            hide-details
+            class="ma-2"
+            label="View Mode"
+          ></v-select>
+        </v-sheet>
     <v-sheet>
           <v-calendar
             ref="calendar"

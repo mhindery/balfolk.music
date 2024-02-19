@@ -8,25 +8,25 @@ from tqdm import tqdm
 from datetime import timedelta, datetime
 
 
-def fetch_from_folkbend(url):
+def fetch_from_folkbalbend(url):
     return requests.get(url, timeout=(2, 20)).json()
 
 
 def get_start_timestamp(entry):
-    # import ipdb
-    # ipdb.set_trace()
     if entry['type'] == 'festival' or entry['type'] == 'ball':
         if ball := entry.get('ball'):
             if ball.get('initiation_start'):
-                return ball.get('initiation_start')
+                return arrow.get('2024-01-01 ' + ball.get('initiation_start')).time()
             try:
-                return ball['performances'][0]['start'] or arrow.get('2024-01-01 00:00:00').time()
+                if ball['performances'][0]['start']:
+                    return arrow.get(ball['performances'][0]['start']).time()
+                return arrow.get('2024-01-01 00:00:00').time()
             except:
                 return arrow.get('2024-01-01 00:00:00').time()
         return arrow.get('2024-01-01 00:00:00').time()
     if entry['type'] == 'course':
         if courses := entry.get('courses'):
-            return courses[0]['start']
+            return arrow.get('2024-01-01 ' + courses[0]['start']).time()
         return arrow.get('2024-01-01 00:00:00').time()
 
     return arrow.get('2024-01-01 00:00:00').time()
@@ -36,16 +36,18 @@ def get_end_timestamp(entry):
     if entry['type'] == 'festival' or entry['type'] == 'ball':
         if ball := entry.get('ball'):
             try:
-                return ball['performances'][-1]['end'] or arrow.get('2024-01-01 00:00:00').time()
+                if ball['performances'][-1]['end']:
+                    return arrow.get('2024-01-01 ' + ball['performances'][-1]['end']).time()
+                return arrow.get('2024-01-01 23:59:59').time()
             except:
-                return arrow.get('2024-01-01 00:00:00').time()
-        return arrow.get('2024-01-01 00:00:00').time()
+                return arrow.get('2024-01-01 23:59:59').time()
+        return arrow.get('2024-01-01 23:59:59').time()
     if entry['type'] == 'course':
         if courses := entry.get('courses'):
-            return courses[-1]['start']
-        return arrow.get('2024-01-01 00:00:00').time()
+            return arrow.get('2024-01-01 ' + courses[-1]['start']).time()
+        return arrow.get('2024-01-01 23:59:59').time()
 
-    return arrow.get('2024-01-01 00:00:00').time()
+    return arrow.get('2024-01-01 23:59:59').time()
 
 
 def get_address(entry):
@@ -103,6 +105,7 @@ def lookup_existing_festival(entry):
     date_after = date.shift(days=1)
 
     possible_match = Festival.objects.filter(
+        Q(source=Event.Source.FOLKBALBENDE) &
         Q(name=entry['name']) & (
             Q(dates__date=date.datetime) |
             Q(dates__date=date_before.datetime) |
@@ -113,6 +116,10 @@ def lookup_existing_festival(entry):
 
 
 def create_object(entry):
+    # if str(entry['id']) == '2072':
+    #     import ipdb
+    #     ipdb.set_trace()
+
     if ' Dag ' in entry['name']:
         entry['name'] = entry['name'].split(' Dag ')[0]
 
@@ -121,24 +128,18 @@ def create_object(entry):
         event = lookup_existing_festival(entry)
 
     if not event:
-        event = Event.objects.filter(folkbende_id=entry['id']).first()
+        event = Event.objects.filter(source=Event.Source.FOLKBALBENDE, folkbende_id=entry['id']).first()
         if not event:
-            event = Event(folkbende_id=entry['id'])
+            event = Event(source=Event.Source.FOLKBALBENDE, folkbende_id=entry['id'])
 
     event.name = entry['name']
     event.site = entry['websites'][0]['url'] if entry['websites'] else entry.get('reservation_url', '')
     event.start_timestamp = get_start_timestamp(entry)
     event.end_timestamp = get_end_timestamp(entry)
 
+    # Heuristic could not determine decent times, just add a few hours to the end time to be somewhat realistic
     if event.start_timestamp == event.end_timestamp:
-        # event.end_timestamp = event.end_timestamp + timedelta(hours=2)
-        # event.end_timestamp.hour += 2
-        # import ipdb
-        # ipdb.set_trace()
-        if isinstance(event.end_timestamp, str):
-            dummy = arrow.get('2022-01-01 ' + event.end_timestamp)
-            event.end_timestamp = dummy.time()
-        event.end_timestamp = (datetime.combine(arrow.get().datetime, event.end_timestamp) + timedelta(hours=2)).time()
+        event.end_timestamp = (datetime.combine(arrow.get().datetime, event.end_timestamp) + timedelta(hours=3)).time()
 
     event.address = get_address(entry)
     event.pricing = get_pricing(entry)
@@ -170,45 +171,45 @@ def create_object(entry):
 
     try:
         event.save()
+        event.save()
         # print(event)
+        event.dates.clear()
         for d in entry['dates']:
             date_obj, _ = EventDate.objects.get_or_create(date=arrow.get(d).datetime)
             event.dates.add(date_obj)
+        event.save()
 
     except Exception as e:
-        import ipdb
-        ipdb.set_trace()
+        # import ipdb
+        # ipdb.set_trace()
         print(f'error on: {entry}: {e}')
 
 
-def load_data_from_folkbende():
-    start = arrow.get('2022-01-01')
-    end = arrow.get('2025-04-01')
+def yield_entries():
+    start = arrow.get('2024-02-18')
+    end = arrow.get().shift(weeks=75)
     urls_to_do = []
     for r in arrow.Arrow.span_range('month', start, end):
-        url = f'https://www.folkbalbende.be/interface/events.php?start={
-            r[0].date()}&end={r[1].date()}&type=ball,festival,course'
-        # url = f'https://www.folkbalbende.be/interface/events.php?start={
-        #     r[0].date()}&end={r[1].date()}&type=festival'
+        url = f'https://www.folkbalbende.be/interface/events.php?start={r[0].date()}&end={r[1].date()}&type=ball,festival,course'
+        # url = f'https://www.folkbalbende.be/interface/events.php?start={r[0].date()}&end={r[1].date()}&type=festival'
         urls_to_do.append(url)
 
-    data = []
-    for url in tqdm(urls_to_do):
+    for url in tqdm(urls_to_do[::]):
         try:
-            url_data = fetch_from_folkbend(url)
-            # print(len(url_data))
-            data.extend(url_data)
+            for entry in fetch_from_folkbalbend(url):
+                yield entry
         except Exception as e:
             print(f'Error fetching url {url}')
 
-    print(f'Fetched {len(data)} entries from api')
-    return data
 
+# def create_from_data(data):
+#     for entry in tqdm(data):
+#         if not entry['cancelled']:
+#             # if entry['id'] == 2012:
+#             #     import ipdb
+#             #     ipdb.set_trace()
+#             create_object(entry)
 
-def create_from_data(data):
-    for entry in tqdm(data):
-        if not entry['cancelled']:
-            # if entry['id'] == 2012:
-            #     import ipdb
-            #     ipdb.set_trace()
-            create_object(entry)
+def scrape_folkbalbende_data():
+    for entry in yield_entries():
+        create_object(entry)

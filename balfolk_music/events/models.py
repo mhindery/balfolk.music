@@ -34,6 +34,12 @@ class Event(models.Model):
     ending_datetime = models.DateTimeField(null=True)
     starting_datetime = models.DateTimeField(null=True)
 
+    def check_dates(self):
+        # Add a date for the day it overflows into in case for an ending time of a ball being e.g. 1:30 on the night
+        if len(self.dates.all()) == 1 and self.end < self.start:
+            date_obj, _ = EventDate.objects.get_or_create(date=arrow.get(self.dates.first()).shift(days=1).datetime)
+            self.dates.add(date_obj)
+
     @property
     def start(self):
         dates = [x for x in self.dates.all()]
@@ -101,6 +107,7 @@ class Event(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["event_type", "visible"]),
+            models.Index(fields=["visible", "event_type"]),
         ]
 
     def get_balfolk_music_url(self) -> str:
@@ -115,6 +122,13 @@ class Event(models.Model):
 
     visible = models.BooleanField(default=True)
 
+    class Source(models.TextChoices):
+        FOLKBALBENDE = 'folkbalbende', 'FolkBalBende'
+        BALFOLK_NL = 'balfolk.nl', 'Balfolk.nl'
+        FOLKDANCE_PAGE = 'folkdance.page', 'Folkdance.page'
+        WEBSITE = 'website', 'website'
+
+    source = models.CharField(max_length=24, choices=Source.choices)
     folkbende_id = models.IntegerField(blank=True, null=True)
     balfolknl_id = models.CharField(max_length=512, blank=True, null=True)
 
@@ -172,6 +186,7 @@ class Event(models.Model):
         if self.id:
             self.ending_datetime = self.end
             self.starting_datetime = self.start
+            self.check_dates()
         self.fill_country()
         if self.country and len(self.country) > 2:
             self.correct_country_to_alpha_2()

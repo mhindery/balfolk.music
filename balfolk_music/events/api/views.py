@@ -34,12 +34,12 @@ class FestivalViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
             return Festival.objects.filter(visible=True).only(
                 'id',
                 'name',
-                'start_timestamp',
-                'end_timestamp',
+                'starting_datetime',
+                'ending_datetime',
                 'banner_image',
                 'city', 'country',
-            ).prefetch_related('dates')
-        return Festival.objects.filter(visible=True).prefetch_related('dates')
+            )
+        return Festival.objects.filter(visible=True)
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -63,16 +63,12 @@ class BallViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
             return Ball.objects.filter(visible=True).only(
                 'id',
                 'name',
-                'start_timestamp',
-                'end_timestamp',
+                'starting_datetime',
+                'ending_datetime',
                 'city', 'country',
-            ).prefetch_related(
-                'dates'
-            ).order_by(
-                '-ending_datetime'
-            )[:300]
+            )
             # ).order_by('id')[:100]
-        return Ball.objects.filter(visible=True).prefetch_related('dates')
+        return Ball.objects.filter(visible=True)
 
     def get_serializer_class(self):
         if self.action == 'list':

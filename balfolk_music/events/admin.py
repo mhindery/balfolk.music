@@ -54,9 +54,13 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Ball)
 class BallAdmin(admin.ModelAdmin):
-    list_display = ["name", "start_timestamp", "country", "visible"]
+    list_display = ["name", "starting_datetime", "country"]
     list_filter = ['visible', 'country']
-    readonly_fields = ['created_at', ]
+    readonly_fields = ['created_at', 'starting_datetime', 'ending_datetime']
     search_fields = ["name"]
+    ordering = ['-starting_datetime']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('dates')
 
     # date_hierarchy = 'start_timestamp'
