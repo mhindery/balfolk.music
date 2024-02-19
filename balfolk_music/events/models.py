@@ -83,8 +83,12 @@ class Event(models.Model):
     country = models.CharField(max_length=3, choices=[(x.alpha_2, x.name) for x in pycountry.countries], blank=True)
 
     def fill_country(self):
+        if self.folkbende_id and not self.country:
+            self.country = 'BE'
+        if self.balfolknl_id and not self.country:
+            self.country = 'NL'
         if self.city and not self.country:
-            if self.city in ['Leuven', 'Gooik', 'Aalst', 'Namur', 'Namen', 'Charleroi', 'Uccle', 'Limburg', 'Kortrijk', 'Mechelen', 'Wijgmaal', 'Diest', 'Elsene', 'Belsele', 'Asse', 'Lebbeke', 'Brussels']:
+            if self.city in ['Leuven', 'Antwerpen', 'Roeselare', 'Waregem', 'Heverlee', 'Watermaal-Bosvoorde', 'Grandmenil', 'Zingem', 'Gooik', 'Aalst', 'Namur', 'Namen', 'Charleroi', 'Uccle', 'Limburg', 'Kortrijk', 'Mechelen', 'Wijgmaal', 'Diest', 'Elsene', 'Belsele', 'Asse', 'Lebbeke', 'Brussels']:
                 self.country = 'BE'
                 return
 
@@ -131,6 +135,7 @@ class Event(models.Model):
     source = models.CharField(max_length=24, choices=Source.choices)
     folkbende_id = models.IntegerField(blank=True, null=True)
     balfolknl_id = models.CharField(max_length=512, blank=True, null=True)
+    folkdancepage_id = models.CharField(max_length=512, blank=True, null=True)
 
     def __str__(self) -> str:
         return f'{self.get_event_type_display()}: {self.name}'

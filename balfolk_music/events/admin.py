@@ -11,6 +11,9 @@ from balfolk_music.events.models import Festival, Course, Event, Ball
 User = get_user_model()
 
 
+list_display = ["name", "starting_datetime", "city", "country"]
+
+
 class EventYearFilter(admin.SimpleListFilter):
     title = _('year')
     parameter_name = 'year'
@@ -31,36 +34,38 @@ class EventYearFilter(admin.SimpleListFilter):
 
 @admin.register(Festival)
 class FestivalAdmin(admin.ModelAdmin):
-    list_display = ["name", "start", "country", "visible"]
+    list_display = list_display
     list_filter = ['visible', 'country']
     readonly_fields = ['created_at', ]
     search_fields = ["name"]
+    ordering = ['-starting_datetime']
 
     # date_hierarchy = 'start_timestamp'
 
     def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('dates')
+        return super().get_queryset(request)
 
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ["name", "start_timestamp", "country", "visible"]
+    list_display = list_display
     list_filter = ['visible', 'country']
     readonly_fields = ['created_at', ]
     search_fields = ["name"]
+    ordering = ['-starting_datetime']
 
     # date_hierarchy = 'start_timestamp'
 
 
 @admin.register(Ball)
 class BallAdmin(admin.ModelAdmin):
-    list_display = ["name", "starting_datetime", "country"]
+    list_display = list_display
     list_filter = ['visible', 'country']
     readonly_fields = ['created_at', 'starting_datetime', 'ending_datetime']
     search_fields = ["name"]
     ordering = ['-starting_datetime']
 
     def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('dates')
+        return super().get_queryset(request)
 
     # date_hierarchy = 'start_timestamp'

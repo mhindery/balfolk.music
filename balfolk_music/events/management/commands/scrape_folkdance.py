@@ -2,6 +2,7 @@ import ipdb
 import requests
 import arrow
 from tqdm import tqdm
+import datetime
 from balfolk_music.events.models import Event, Ball, EventDate, Festival, Course
 
 
@@ -25,8 +26,7 @@ def process_entry(entry):
         event = Event.objects.filter(
             source=Event.Source.FOLKDANCE_PAGE,
             name=entry['name'],
-            starting_datetime=arrow.get(entry['start']).datetime,
-            ending_datetime=arrow.get(entry['end']).datetime,
+            folkdancepage_id=entry['name']+'_'+entry['start'],
         ).first()
 
     if event:
@@ -45,6 +45,7 @@ def process_entry(entry):
 
             event = event_cls(
                 source=Event.Source.FOLKDANCE_PAGE,
+                folkdancepage_id=entry['name']+'_'+entry['start'],
                 name=entry['name'],
                 description=entry.get('details', ''),
                 pricing=entry.get('price', ''),
@@ -58,12 +59,10 @@ def process_entry(entry):
             ipdb.set_trace()
             print(e)
 
-    try:
-        event.start_timestamp = arrow.get(entry['start']).time()
-        event.end_timestamp = arrow.get(entry['end']).time()
-    except Exception as e:
-        import ipdb
-        ipdb.set_trace()
+    event.start_timestamp = arrow.get(entry['start']).time()
+    event.end_timestamp = arrow.get(entry['end']).time()
+    event.starting_datetime = arrow.get(entry['start']).datetime
+    event.ending_datetime = arrow.get(entry['end']).datetime
 
     event.city = entry['city']
 
@@ -89,20 +88,42 @@ def process_entry(entry):
         event.country = 'GB'
 
     try:
-        event.save()
-        event.save()
+        if event.id:
+            event.save()
+        else:
+            event.save()
+            event.save()
     except Exception as e:
         import ipdb
         ipdb.set_trace()
         print(e)
 
-    event.dates.clear()
-    d, _ = EventDate.objects.get_or_create(date=arrow.get(entry['start']).date())
-    event.dates.add(d)
+    dates_to_add = []
+
+    if event.event_type == Event.Type.FESTIVAL:
+        for da in arrow.Arrow.range('day', arrow.get(entry['start']), arrow.get(entry['end'])):
+            d, _ = EventDate.objects.get_or_create(date=da.date())
+            dates_to_add.append(d)
+        d, _ = EventDate.objects.get_or_create(date=arrow.get(entry['start']).date())
+        dates_to_add.append(d)
+        d, _ = EventDate.objects.get_or_create(date=arrow.get(entry['end']).date())
+        dates_to_add.append(d)
+    else:
+        d, _ = EventDate.objects.get_or_create(date=arrow.get(entry['start']).date())
+        dates_to_add.append(d)
+
+    event.dates.set(set(dates_to_add))
+
     event.save()
 
 
 def scrape_folkdance_data():
     entries = requests.get('https://folkdance.page/index.json?styles=balfolk&date=all').json()
     for entry in tqdm(entries['events'][::-1]):
+        # if entry['name'] == 'Balfolk.pl Festival':
+        #     import ipdb
+        #     ipdb.set_trace()
+        #     process_entry(entry)
+        # else:
+        #     continue
         process_entry(entry)

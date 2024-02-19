@@ -131,8 +131,12 @@ def get_entry_data(url):
         event.facebook = facebook
         event.organizer = organizer
 
-        event.save()
-        event.save()
+        if event.id:
+            event.save()
+        else:
+            event.save()
+            event.save()
+
         event.dates.clear()
         d, _ = EventDate.objects.get_or_create(date=event_date)
         event.dates.add(d)

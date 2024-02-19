@@ -21,6 +21,6 @@ class Command(BaseCommand):
         scrape_folkdance_data()
 
     def handle(self, *args, **kwargs):
-        # self.load_folkbalbende()
-        # self.load_balfolknl()
+        self.load_folkbalbende()
+        self.load_balfolknl()
         self.load_folkdance()

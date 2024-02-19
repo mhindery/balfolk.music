@@ -170,13 +170,17 @@ def create_object(entry):
     #     ipdb.set_trace()
 
     try:
-        event.save()
-        event.save()
-        # print(event)
-        event.dates.clear()
+        if event.id:
+            event.save()
+        else:
+            event.save()
+            event.save()
+
+        dates_to_add = []
         for d in entry['dates']:
             date_obj, _ = EventDate.objects.get_or_create(date=arrow.get(d).datetime)
-            event.dates.add(date_obj)
+            dates_to_add.append(date_obj)
+        event.dates.set(set(dates_to_add))
         event.save()
 
     except Exception as e:
@@ -186,7 +190,7 @@ def create_object(entry):
 
 
 def yield_entries():
-    start = arrow.get('2024-02-18')
+    start = arrow.get().shift(years=-2)
     end = arrow.get().shift(weeks=75)
     urls_to_do = []
     for r in arrow.Arrow.span_range('month', start, end):

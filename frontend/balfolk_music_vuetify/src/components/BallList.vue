@@ -32,7 +32,7 @@
                                             </v-col>
                                             <!-- Event title -->
                                             <v-col>
-                                                <v-row class="ml-2 text-h6" no-gutters v-text="item.raw.name"></v-row>
+                                                <v-row class="ml-2 text-h6" no-gutters v-text="clipName(item.raw.name)"></v-row>
                                                 <v-row class="ml-2 text-subtitle-2 text-grey" no-gutters>
                                                     <!-- <v-icon size="x-small" icon="mdi-map-marker"></v-icon> -->
                                                      {{ formatLocation(item.raw) }}
@@ -81,7 +81,7 @@
                                                 </v-col>
                                                 <!-- Event title -->
                                                 <v-col>
-                                                    <v-row class="ml-2 text-h6" no-gutters v-text="item.raw.name"></v-row>
+                                                    <v-row class="ml-2 text-h6" no-gutters v-text="clipName(item.raw.name)"></v-row>
                                                     <v-row class="ml-2 text-subtitle-2 text-grey" no-gutters>
                                                         <!-- <v-icon size="x-small" icon="mdi-map-marker"></v-icon> -->
                                                          {{ formatLocation(item.raw) }}
@@ -198,6 +198,13 @@ function formatLocation(obj) {
         return obj.country_name
     }
     return obj.city
+}
+
+function clipName(s) {
+    if (s.length > 55) {
+        return s.slice(0, 55) + '...';
+    }
+    return s
 }
 
 </script>
