@@ -2,29 +2,84 @@
 // const props = defineProps(['id',]);
 
 import { ref } from 'vue';
-import axios from 'axios'
+import axios from 'axios';
+import { useRoute } from "vue-router";
+
+const model = defineModel();
 
 const isFormValid = ref(false);
 
-const eventType = ref('ball');
-const eventName = ref('');
-const eventOrganizer = ref('');
-const eventDescription = ref('');
-const eventSite = ref('');
-const eventFacebook = ref('');
-const eventBanner = ref('');
-const eventPoster = ref('');
-const eventSchedule = ref('');
-const eventPricing = ref('');
-const eventAddress = ref('');
-const eventDates = ref([]);
-const eventStartTime = ref('18:30:00');
-const eventEndTime = ref('23:30:00');
-const eventCity = ref('');
-const eventCountry = ref('');
+const obj = ref({
+    event_type: 'ball',
+    name: '',
+    organizer: '',
+    description: '',
+    site: '',
+    facebook: '',
+    banner: '',
+    poster: '',
+    schedule: '',
+    pricing: '',
+    address: '',
+    city: '',
+    country: '',
+    dates: [],
+    starttime: '18:30:00',
+    endtime: '23:30:00',
+    id: -1
+});
 
+const isNewEvent = ref(true);
 const loading = ref(false);
 
+// function getCookie(name) {
+//     let cookieValue = null;
+//     console.log(document.cookie);
+//     if (document.cookie && document.cookie !== '') {
+//         const cookies = document.cookie.split(';');
+//         for (let i = 0; i < cookies.length; i++) {
+//             const cookie = cookies[i].trim();
+//             // Does this cookie string begin with the name we want?
+//             if (cookie.substring(0, name.length + 1) === (name + '=')) {
+//                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+//                 break;
+//             }
+//         }
+//     }
+//     return cookieValue;
+// }
+
+async function loadExistingEvent(id) {
+    var response = await axios.get('/events/' + id + '/');
+    // console.log(response.data);
+    obj.value.name = response.data.name;
+    obj.value.organizer = response.data.organizer;
+    obj.value.description = response.data.description;
+    obj.value.site = response.data.site;
+    obj.value.facebook = response.data.facebook;
+    obj.value.banner = response.data.banner_image;
+    obj.value.poster = response.data.poster_image;
+    obj.value.schedule = response.data.schedule;
+    obj.value.dates = response.data.dates;
+    obj.value.pricing = response.data.pricing;
+    obj.value.address = response.data.address;
+    obj.value.city = response.data.city;
+    obj.value.country = response.data.country_code;
+    obj.value.starttime = response.data.start_timestamp;
+    obj.value.endtime = response.data.end_timestamp;
+    obj.value.endtime = response.data.end_timestamp;
+    obj.value.event_type = response.data.event_type;
+    obj.value.id = response.data.id;
+}
+
+const routeParams = useRoute().params;
+
+if ('id' in routeParams) {
+    isNewEvent.value = false;
+    loadExistingEvent(routeParams.id);
+} else {
+    
+}
 
 // Country names object using 2-letter country codes to reference country name
 // ISO 3166 Alpha-2 Format: [2 letter Country Code]: [Country Name]
@@ -283,7 +338,7 @@ const countryListAlpha2 = {
 
 function getDatesToSelect(){
     const datesToSelect = [];
-    for (let index = 0; index < 365; index++) {
+    for (let index = -400; index < 400; index++) {
         let d = new Date();
         d.setDate(d.getDate() + index);
         datesToSelect.push(d.toJSON().slice(0, 10))
@@ -296,39 +351,55 @@ function getDatesToSelect(){
 
 
 async function submit(event) {
-    console.log(isFormValid);
-    if (isFormValid.value == true) {
-        loading.value = true
+    // console.log(isFormValid);
+    // console.log(obj.value)
 
+    if (isFormValid.value == true) {
         let postData = {
-            'event_type': eventType.value,
-            'name': eventName.value,
-            'organizer': eventOrganizer.value,
-            'description': eventDescription.value,
-            'site': eventSite.value,
-            'facebook': eventFacebook.value,
-            'schedule': eventSchedule.value,
-            'pricing': eventPricing.value,
-            'address': eventAddress.value,
-            'dates': eventDates.value,
-            'start_timestamp': eventStartTime.value,
-            'end_timestamp': eventEndTime.value,
+            'id': obj.value.id,
+            'event_type': obj.value.event_type,
+            'name': obj.value.name,
+            'organizer': obj.value.organizer,
+            'description': obj.value.description,
+            'site': obj.value.site,
+            'facebook': obj.value.facebook,
+            'schedule': obj.value.schedule,
+            'pricing': obj.value.pricing,
+            'address': obj.value.address,
+            'dates': obj.value.dates,
+            'start_timestamp': obj.value.starttime,
+            'end_timestamp': obj.value.endtime,
         }
 
-        console.log('posting...')
-
+        // console.log(obj);
         // console.log(postData);
 
-        // axios.post('http://localhost:8000/events/api/create', postData)
-        axios.post('/events/api/create', postData)
-            .then((response) => {
-                loading.value = false;
-                console.log(response.data);
-                window.open(response.data['balfolk_music_url']);
-            }, (error) => {
-                loading.value = false;
-                console.log(error);
-            });
+        if (obj.value.id == -1) {
+            // Submit new event
+            loading.value = true
+            axios.post('/events/create', postData, { headers: { 'X - CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value } })
+                .then((response) => {
+                    loading.value = false;
+                    // console.log(response.data);
+                    // window.open(response.data['balfolk_music_url']);
+                }, (error) => {
+                    loading.value = false;
+                    console.log(error);
+                });
+
+        } else {
+            // Edit existing event
+            loading.value = true
+            axios.put('/events/' + obj.value.id, postData, { headers: {'X - CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }})
+                .then((response) => {
+                    loading.value = false;
+                    // console.log(response.data);
+                    // window.open(response.data['balfolk_music_url']);
+                }, (error) => {
+                    loading.value = false;
+                    console.log(error);
+                });
+        }
 
     } else {
         console.log('Form not valid');
@@ -343,7 +414,7 @@ const rules = {
 
 <template>
     <v-sheet class="mx-auto">
-        <h1>Add a new event</h1>
+        <h1>{{ isNewEvent? 'Add a new event' : 'Edit existing event: ' + obj.name }}</h1>
         <p>Fill in the information below to add a new event to the site.</p>
         <v-divider class="ma-4"></v-divider>
         <v-form v-model="isFormValid" @submit.prevent="submit">
@@ -351,30 +422,29 @@ const rules = {
             <h4 class="my-4">Basic information</h4>
 
             <h5 class="my-4">Which type of event is this?</h5>
-            <v-radio-group v-model="eventType">
+            <v-radio-group v-model="obj.event_type">
                 <v-radio label="Ball" value="ball"></v-radio>
                 <v-radio label="Festival" value="festival"></v-radio>
                 <v-radio label="Course / Workshop" value="course"></v-radio>
             </v-radio-group>
 
-            <v-text-field v-model="eventName" :rules="[rules.required]" label="Event name"></v-text-field>
-            <v-text-field v-model="eventOrganizer" :rules="[rules.required]" label="Organizer"></v-text-field>
+            <v-text-field v-model="obj.name" :rules="[rules.required]" label="Event name"></v-text-field>
+            <v-text-field v-model="obj.organizer" :rules="[rules.required]" label="Organizer"></v-text-field>
 
-            <v-textarea v-model="eventDescription" auto-grow :rules="[rules.required]" label="Description"></v-textarea>
+            <v-textarea v-model="obj.description" auto-grow :rules="[rules.required]" label="Description"></v-textarea>
 
             <v-divider></v-divider>
             <h4 class="my-4">When is the event</h4>
 
-            <v-select label="Date(s)" :rules="[rules.required]" multiple v-model="eventDates"
-                :items="getDatesToSelect()"></v-select>
+            <v-select label="Date(s)" :rules="[rules.required]" multiple v-model="obj.dates" :items="getDatesToSelect()"></v-select>
 
             <v-row>
                 <v-col cols="6">
-                    <v-text-field label="Start time" :rules="[rules.required]" v-model="eventStartTime"
+                    <v-text-field label="Start time" :rules="[rules.required]" v-model="obj.starttime"
                         type="time"></v-text-field>
                 </v-col>
                 <v-col cols="6">
-                    <v-text-field label="End time" :rules="[rules.required]" v-model="eventEndTime"
+                    <v-text-field label="End time" :rules="[rules.required]" v-model="obj.endtime"
                         type="time"></v-text-field>
                 </v-col>
             </v-row>
@@ -383,16 +453,16 @@ const rules = {
             <v-divider></v-divider>
             <h4 class="my-4">Where is the event</h4>
 
-            <v-textarea prepend-inner-icon="mdi-map-marker" v-model="eventAddress" :rules="[rules.required]"
+            <v-textarea prepend-inner-icon="mdi-map-marker" v-model="obj.address" :rules="[rules.required]"
                 label="Full address information"></v-textarea>
 
             <v-row>
                 <v-col cols="6">
-                    <v-text-field v-model="eventCity" :rules="[rules.required]"
+                    <v-text-field v-model="obj.city" :rules="[rules.required]"
                         label="City"></v-text-field>
                 </v-col>
                 <v-col cols="6">
-                    <v-select label="Country" v-model="eventCountry" :rules="[rules.required]" item-value="alpha_2"
+                    <v-select label="Country" v-model="obj.country" :rules="[rules.required]" item-value="alpha_2"
                         item-title="name"
                         :items="Object.keys(countryListAlpha2).map((key) => ({ alpha_2: key, name: countryListAlpha2[key] }))"></v-select>
 
@@ -405,26 +475,26 @@ const rules = {
 
             <v-row dense>
                 <v-col cols="12" sm="12" md="6" lg="6">
-                    <v-text-field prepend-inner-icon="mdi-web" v-model="eventSite" label="Website"></v-text-field>
+                    <v-text-field prepend-inner-icon="mdi-web" v-model="obj.site" label="Website"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="12" md="6" lg="6">
-                    <v-text-field prepend-inner-icon="mdi-facebook" v-model="eventFacebook"
+                    <v-text-field prepend-inner-icon="mdi-facebook" v-model="obj.facebook"
                         label="Facebook event link"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="12" md="6" lg="6">
-                    <v-text-field prepend-inner-icon="mdi-image" v-model="eventBanner"
+                    <v-text-field prepend-inner-icon="mdi-image" v-model="obj.banner"
                         label="Banner image link"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="12" md="6" lg="6">
-                    <v-text-field prepend-inner-icon="mdi-image" v-model="eventPoster"
+                    <v-text-field prepend-inner-icon="mdi-image" v-model="obj.poster"
                         label="Poster image link"></v-text-field>
                 </v-col>
             </v-row>
 
-            <p>Provide some information about the schedule of the event. Which bands are playing at what time? Is there an initiation?</p>
-            <v-textarea prepend-inner-icon="mdi-clock-outline" v-model="eventSchedule" auto-grow label="Schedule information"></v-textarea>
+            <p>Provide some information about the schedule or line-up of the event. Which bands are playing at what time? Is there an initiation?</p>
+            <v-textarea prepend-inner-icon="mdi-clock-outline" v-model="obj.schedule" auto-grow label="Schedule information"></v-textarea>
             <p>Provide some information about the ticket prices and formulas.</p>
-            <v-textarea prepend-inner-icon="mdi-ticket" v-model="eventPricing" auto-grow label="Pricing information"></v-textarea>
+            <v-textarea prepend-inner-icon="mdi-ticket" v-model="obj.pricing" auto-grow label="Pricing information"></v-textarea>
 
 
             <v-btn type="submit" block class="mt-2">Submit</v-btn>

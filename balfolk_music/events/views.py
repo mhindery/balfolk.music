@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from .api.serializers import EventSerializer
 from rest_framework.response import Response
 from django.conf import settings
-from rest_framework import status
+from rest_framework import serializers, status
 
 
 class FestivalsIndexView(ListView):
@@ -18,7 +18,7 @@ class FestivalsIndexView(ListView):
         return self.model.objects.filter(visible=True).order_by('start_timestamp')
 
 
-class EventAPICreateView(APIView):
+class EventAPICreateEditView(APIView):
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
@@ -36,6 +36,9 @@ class EventAPICreateView(APIView):
             date_pks.append(obj.pk)
         input_data['dates'] = date_pks
 
+        import ipdb
+        ipdb.set_trace()
+
         serializer = EventSerializer(data=input_data)
         if serializer.is_valid():
             obj = serializer.save()
@@ -44,6 +47,16 @@ class EventAPICreateView(APIView):
 
         # print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, *args, **kwargs):
+        obj = Event.objects.filter(pk=self.kwargs['pk']).first()
+        serializer = EventSerializer(obj)
+        data = serializer.data
+        data['dates'] = [arrow.get(d.date).date().isoformat() for d in EventDate.objects.filter(id__in=data['dates'])]
+        return Response(data, status=status.HTTP_200_OK)
+
+    def put(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
 
 class EventFeed(ICalFeed):

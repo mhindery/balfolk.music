@@ -24,9 +24,6 @@ export default defineConfig({
       },
     }),
   ],
-  devServer: {
-    proxy: 'http://localhost:8000'
-  },
   define: { 'process.env': {} },
   resolve: {
     alias: {
@@ -45,7 +42,8 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': 'http://localhost:8000'
+      '/api': 'http://localhost:8000',
+      '/events': 'http://localhost:8000'
     }
   },
 })
