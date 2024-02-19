@@ -176,6 +176,16 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
                         </v-btn>
                     </a>
                 </v-col>
+                    <v-col cols="auto">
+                        <router-link style="text-decoration: none; color: inherit;" :to="{ name: 'EventEdit', params: { id: obj.id } }">
+                            <v-btn variant="text" prepend-icon="mdi-calendar-edit">
+                                <template v-slot:prepend>
+                                    <v-icon></v-icon>
+                                </template>
+                                Edit this event
+                            </v-btn>
+                        </router-link>
+                    </v-col>
             </v-row>
         </v-container>
 

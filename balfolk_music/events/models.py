@@ -116,11 +116,11 @@ class Event(models.Model):
 
     def get_balfolk_music_url(self) -> str:
         if self.event_type == self.Type.FESTIVAL:
-            return f'{settings.SITE_HOST}/festivals/{self.id}'
+            return f'/festivals/{self.id}/'
         if self.event_type == self.Type.BALL:
-            return f'{settings.SITE_HOST}/balls/{self.id}'
+            return f'/balls/{self.id}/'
         if self.event_type == self.Type.COURSE:
-            return f'{settings.SITE_HOST}/courses/{self.id}'
+            return f'/courses/{self.id}/'
 
         return settings.SITE_HOST
 

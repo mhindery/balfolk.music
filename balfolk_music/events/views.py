@@ -2,10 +2,13 @@
 import arrow
 from django.views.generic import ListView
 from django_ical.views import ICalFeed
+from traitlets import Instance
 from .models import Festival, Ball, Course, Event, EventDate
 from rest_framework.views import APIView
 from .api.serializers import EventSerializer
 from rest_framework.response import Response
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.conf import settings
 from rest_framework import serializers, status
 
@@ -21,11 +24,10 @@ class FestivalsIndexView(ListView):
 class EventAPICreateEditView(APIView):
     permission_classes = []
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, pk=None, *args, **kwargs):
         '''
-        Create the Event with given data
+        Create or update the Event with given data
         '''
-
         input_data = dict(request.data)
         # input_data['visible'] = False
 
@@ -36,27 +38,30 @@ class EventAPICreateEditView(APIView):
             date_pks.append(obj.pk)
         input_data['dates'] = date_pks
 
-        import ipdb
-        ipdb.set_trace()
+        # Update existing instance if requested
+        instance = None
+        if pk:
+            instance = Event.objects.get(pk=pk)
 
-        serializer = EventSerializer(data=input_data)
+        serializer = EventSerializer(instance=instance, data=input_data)
         if serializer.is_valid():
             obj = serializer.save()
             # print(f'Created {obj}')
+            if pk:
+                return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        # print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get(self, request, *args, **kwargs):
-        obj = Event.objects.filter(pk=self.kwargs['pk']).first()
+    def get(self, request, pk, *args, **kwargs):
+        obj = Event.objects.filter(pk=pk).first()
         serializer = EventSerializer(obj)
         data = serializer.data
         data['dates'] = [arrow.get(d.date).date().isoformat() for d in EventDate.objects.filter(id__in=data['dates'])]
         return Response(data, status=status.HTTP_200_OK)
 
-    def put(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
+    def put(self, request, pk, *args, **kwargs):
+        return self.post(request, pk=pk, *args, **kwargs)
 
 
 class EventFeed(ICalFeed):

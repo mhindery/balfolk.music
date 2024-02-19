@@ -5,7 +5,7 @@
  */
 
 // Composables
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import FestivalList from '../components/FestivalList.vue'
 import BallList from '../components/BallList.vue'
 import EventDetail from '../components/EventDetail.vue'
@@ -18,19 +18,19 @@ import Playlists from '../components/Playlists.vue'
 const routes = [
   { path: '/', name: 'Index', meta: {title: 'Balfolk.music'}, component: FestivalList },
   { path: '/festivals/', name: 'FestivalList', meta: {title: 'Balfolk.music > Festivals'}, component: FestivalList, props: true },
-  { path: '/festivals/:id', name: 'FestivalDetail', meta: {title: 'Balfolk.music > Event details'}, component: EventDetail, props: route => ({ id: route.params.id, apiURL: '/api/festivals/' }) },
+  { path: '/festivals/:id/', name: 'FestivalDetail', meta: {title: 'Balfolk.music > Event details'}, component: EventDetail, props: route => ({ id: route.params.id, apiURL: '/api/festivals/' }) },
   { path: '/balls/', name: 'BallList', meta: {title: 'Balfolk.music > Balls'}, component: BallList, props: true },
-  { path: '/balls/:id', name: 'BallDetail', meta: {title: 'Balfolk.music > Event details'}, component: EventDetail, props: route => ({ id: route.params.id, apiURL: '/api/balls/' }) },
+  { path: '/balls/:id/', name: 'BallDetail', meta: {title: 'Balfolk.music > Event details'}, component: EventDetail, props: route => ({ id: route.params.id, apiURL: '/api/balls/' }) },
   { path: '/courses/', name: 'CourseList', meta: {title: 'Balfolk.music > Courses/Workshops'}, component: CourseList, props: true },
-  { path: '/courses/:id', name: 'CourseDetail', meta: {title: 'Balfolk.music > Event details'}, component: EventDetail, props: route => ({ id: route.params.id, apiURL: '/api/courses/' }) },
+  { path: '/courses/:id/', name: 'CourseDetail', meta: {title: 'Balfolk.music > Event details'}, component: EventDetail, props: route => ({ id: route.params.id, apiURL: '/api/courses/' }) },
   { path: '/add/', name: 'EventAdd', meta: {title: 'Balfolk.music > Add new event'}, component: EventAddEdit, props: true },
-  { path: '/edit/:id', name: 'EventEdit', meta: { title: 'Balfolk.music > Edit event' }, component: EventAddEdit, props: true },
+  { path: '/edit/:id/', name: 'EventEdit', meta: { title: 'Balfolk.music > Edit event' }, component: EventAddEdit, props: true },
   { path: '/calendar/', name: 'Calendar', meta: {title: 'Balfolk.music > Calendar'}, component: Calendar, props: true },
   { path: '/playlists/', name: 'Playlists', meta: {title: 'Balfolk.music > Playlists'}, component: Playlists, props: true },
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes: routes,
 })
 

@@ -373,15 +373,17 @@ async function submit(event) {
 
         // console.log(obj);
         // console.log(postData);
+        // { headers: { 'X - CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value } }
 
         if (obj.value.id == -1) {
             // Submit new event
             loading.value = true
-            axios.post('/events/create', postData, { headers: { 'X - CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value } })
+            axios.post('/events/create', postData)
                 .then((response) => {
                     loading.value = false;
                     // console.log(response.data);
                     // window.open(response.data['balfolk_music_url']);
+                    window.location.href = response.data['balfolk_music_url'];
                 }, (error) => {
                     loading.value = false;
                     console.log(error);
@@ -390,11 +392,12 @@ async function submit(event) {
         } else {
             // Edit existing event
             loading.value = true
-            axios.put('/events/' + obj.value.id, postData, { headers: {'X - CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }})
+            axios.put('/events/' + obj.value.id + '/', postData)
                 .then((response) => {
                     loading.value = false;
                     // console.log(response.data);
                     // window.open(response.data['balfolk_music_url']);
+                    window.location.href = response.data['balfolk_music_url'];
                 }, (error) => {
                     loading.value = false;
                     console.log(error);
@@ -402,7 +405,7 @@ async function submit(event) {
         }
 
     } else {
-        console.log('Form not valid');
+        alert('Form is not valid');
     }
 }
 
@@ -431,7 +434,7 @@ const rules = {
             <v-text-field v-model="obj.name" :rules="[rules.required]" label="Event name"></v-text-field>
             <v-text-field v-model="obj.organizer" :rules="[rules.required]" label="Organizer"></v-text-field>
 
-            <v-textarea v-model="obj.description" auto-grow :rules="[rules.required]" label="Description"></v-textarea>
+            <v-textarea v-model="obj.description" auto-grow :rules="[]" label="Description"></v-textarea>
 
             <v-divider></v-divider>
             <h4 class="my-4">When is the event</h4>
@@ -453,7 +456,7 @@ const rules = {
             <v-divider></v-divider>
             <h4 class="my-4">Where is the event</h4>
 
-            <v-textarea prepend-inner-icon="mdi-map-marker" v-model="obj.address" :rules="[rules.required]"
+            <v-textarea prepend-inner-icon="mdi-map-marker" v-model="obj.address" :rules="[]"
                 label="Full address information"></v-textarea>
 
             <v-row>
@@ -496,8 +499,9 @@ const rules = {
             <p>Provide some information about the ticket prices and formulas.</p>
             <v-textarea prepend-inner-icon="mdi-ticket" v-model="obj.pricing" auto-grow label="Pricing information"></v-textarea>
 
+            <v-alert type="warning" v-if="!isFormValid" text="There are errors on the form. Fix these before you can submit."></v-alert>
 
-            <v-btn type="submit" block class="mt-2">Submit</v-btn>
+            <v-btn :disabled="!isFormValid" color="blue"  type="submit" block class="mt-2">Save</v-btn>
         </v-form>
     </v-sheet>
 </template>
