@@ -12,7 +12,7 @@
           <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         </template>
 
-        <v-app-bar-title>Balfolk.music</v-app-bar-title>
+        <v-app-bar-title>{{ $route.meta.title || "Balfolk.music" }}</v-app-bar-title>
 
         <template v-slot:append>
           <!-- <v-btn icon="mdi-heart"></v-btn> -->
@@ -35,6 +35,8 @@
               :to="{ name: 'Calendar' }"></v-list-item>
           <v-list-item prepend-icon="mdi-plus-circle-outline" title="Add event" value="add_event"
             :to="{ name: 'EventAdd' }"></v-list-item>
+            <v-list-item prepend-icon="mdi-music" title="Music" value="playlists"
+              :to="{ name: 'Playlists' }"></v-list-item>
         </v-list>
       </v-navigation-drawer>
 

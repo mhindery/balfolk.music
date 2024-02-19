@@ -5,7 +5,7 @@ from .serializers import PlaylistSerializer, SongSerializer
 from balfolk_music.music.models import Playlist, Song
 
 
-class PlaylistViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
+class PlaylistViewSet(ListModelMixin, GenericViewSet):
     serializer_class = PlaylistSerializer
     lookup_field = 'pk'
 

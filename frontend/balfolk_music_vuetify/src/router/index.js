@@ -12,18 +12,20 @@ import EventDetail from '../components/EventDetail.vue'
 import CourseList from '../components/CourseList.vue'
 import EventAdd from '../components/EventAdd.vue'
 import Calendar from '../components/Calendar.vue'
+import Playlists from '../components/Playlists.vue'
 // import { setupLayouts } from 'virtual:generated-layouts'
 
 const routes = [
-  { path: '/', name: 'Index', component: FestivalList },
-  { path: '/festivals', name: 'FestivalList', component: FestivalList, props: true },
-  { path: '/festivals/:id', name: 'FestivalDetail', component: EventDetail, props: route => ({ id: route.params.id, apiURL: '/api/festivals/' }) },
-  { path: '/balls', name: 'BallList', component: BallList, props: true },
-  { path: '/balls/:id', name: 'BallDetail', component: EventDetail, props: route => ({ id: route.params.id, apiURL: '/api/balls/' }) },
-  { path: '/courses', name: 'CourseList', component: CourseList, props: true },
-  { path: '/courses/:id', name: 'CourseDetail', component: EventDetail, props: route => ({ id: route.params.id, apiURL: '/api/courses/' }) },
-  { path: '/add', name: 'EventAdd', component: EventAdd, props: true },
-  { path: '/calendar', name: 'Calendar', component: Calendar, props: true },
+  { path: '/', name: 'Index', meta: {title: 'Balfolk.music'}, component: FestivalList },
+  { path: '/festivals', name: 'FestivalList', meta: {title: 'Balfolk.music > Festivals'}, component: FestivalList, props: true },
+  { path: '/festivals/:id', name: 'FestivalDetail', meta: {title: 'Balfolk.music > Event details'}, component: EventDetail, props: route => ({ id: route.params.id, apiURL: '/api/festivals/' }) },
+  { path: '/balls', name: 'BallList', meta: {title: 'Balfolk.music > Balls'}, component: BallList, props: true },
+  { path: '/balls/:id', name: 'BallDetail', meta: {title: 'Balfolk.music > Event details'}, component: EventDetail, props: route => ({ id: route.params.id, apiURL: '/api/balls/' }) },
+  { path: '/courses', name: 'CourseList', meta: {title: 'Balfolk.music > Courses/Workshops'}, component: CourseList, props: true },
+  { path: '/courses/:id', name: 'CourseDetail', meta: {title: 'Balfolk.music > Event details'}, component: EventDetail, props: route => ({ id: route.params.id, apiURL: '/api/courses/' }) },
+  { path: '/add', name: 'EventAdd', meta: {title: 'Balfolk.music > Add new event'}, component: EventAdd, props: true },
+  { path: '/calendar', name: 'Calendar', meta: {title: 'Balfolk.music > Calendar'}, component: Calendar, props: true },
+  { path: '/playlists', name: 'Playlists', meta: {title: 'Balfolk.music > Playlists'}, component: Playlists, props: true },
 ]
 
 const router = createRouter({

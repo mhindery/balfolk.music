@@ -37,7 +37,7 @@ class Event(models.Model):
     def check_dates(self):
         # Add a date for the day it overflows into in case for an ending time of a ball being e.g. 1:30 on the night
         if len(self.dates.all()) == 1 and self.end < self.start:
-            date_obj, _ = EventDate.objects.get_or_create(date=arrow.get(self.dates.first()).shift(days=1).datetime)
+            date_obj, _ = EventDate.objects.get_or_create(date=arrow.get(self.dates.first().date).shift(days=1).datetime)
             self.dates.add(date_obj)
 
     @property

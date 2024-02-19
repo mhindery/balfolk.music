@@ -11,6 +11,7 @@ class Playlist(models.Model):
     name = models.CharField(max_length=128)
     description = models.TextField()
     link = models.URLField()
+    platform_id = models.CharField(max_length=256)
 
     class Platform(models.TextChoices):
         SPOTIFY = "spotify", _("Spotify")

@@ -12,18 +12,18 @@
             <v-window-item value=upcoming>
                 <v-container fluid>
                     <v-row dense>
-                        <FestivalCard v-for="festival in get_upcoming_events(festivals)" :id="festival.id"
+                        <FestivalCard v-for="festival in get_upcoming_events(festivals)" :key="festival.id" :id="festival.id"
                             :name="festival.name" :city="festival.city" :country_name="festival.country_name"
-                            :banner_image_url="festival.banner_image_url" :start_timestamp="festival.start" :end_timestamp="festival.end" />
+                            :banner_image_url="festival.banner_image_url" :start_timestamp="festival.starting_datetime" :end_timestamp="festival.ending_datetime" />
                     </v-row>
                 </v-container>
             </v-window-item>
             <v-window-item value=past>
                 <v-container fluid>
                     <v-row dense>
-                        <FestivalCard v-for="festival in get_past_events(festivals)" :id="festival.id" :name="festival.name"
+                        <FestivalCard v-for="festival in get_past_events(festivals)" :key="festival.id" :id="festival.id" :name="festival.name"
                             :city="festival.city" :country_name="festival.country_name" :image="festival.image_url"
-                            :start_timestamp="festival.start" :end_timestamp="festival.end" />
+                            :banner_image_url="festival.banner_image_url" :start_timestamp="festival.starting_datetime" :end_timestamp="festival.ending_datetime" />
                     </v-row>
                 </v-container>
             </v-window-item>
@@ -44,21 +44,21 @@ async function fetchFestivalListData() {
 }
 
 // load initial data
-fetchFestivalListData()
+fetchFestivalListData();
 
 const tab = ref(0);
 
 function get_upcoming_events(festivals) {
     function is_upcoming(festival) {
-        let festival_date = new Date(festival.end).getTime();
+        let festival_date = new Date(festival.ending_datetime).getTime();
         let now = new Date().getTime();
         return festival_date >= now;
     }
     return festivals.filter(is_upcoming).sort((a, b) => {
-        if (a.start < b.start) {
+        if (a.starting_datetime < b.starting_datetime) {
             return -1;
         }
-        if (a.start > b.start) {
+        if (a.starting_datetime > b.starting_datetime) {
             return 1;
         }
         return 0;
@@ -67,15 +67,15 @@ function get_upcoming_events(festivals) {
 
 function get_past_events(festivals) {
     function is_past(festival) {
-        let festival_date = new Date(festival.end).getTime();
+        let festival_date = new Date(festival.ending_datetime).getTime();
         let now = new Date().getTime();
         return festival_date < now;
     }
     return festivals.filter(is_past).sort((a, b) => {
-        if (a.start < b.start) {
+        if (a.starting_datetime < b.starting_datetime) {
             return 1;
         }
-        if (a.start > b.start) {
+        if (a.starting_datetime > b.starting_datetime) {
             return -1;
         }
         return 0;

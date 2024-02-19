@@ -14,6 +14,8 @@ async function fetchObjDetailData() {
     coordinates.value = [obj.value.lattitude, obj.value.longitude];
 }
 
+// document.title = "Balfolk.music > Event details";
+
 // load initial data
 fetchObjDetailData();
 

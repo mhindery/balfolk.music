@@ -13,6 +13,7 @@ class PlaylistSerializer(serializers.ModelSerializer[Playlist]):
             'description',
             'link',
             'platform',
+            'platform_id',
         ]
 
 

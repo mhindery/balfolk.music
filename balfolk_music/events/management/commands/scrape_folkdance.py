@@ -85,6 +85,9 @@ def process_entry(entry):
     if not event.organizer:
         event.organizer = ''
 
+    if event.country == 'UK':
+        event.country = 'GB'
+
     try:
         event.save()
         event.save()
