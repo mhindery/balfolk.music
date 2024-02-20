@@ -84,8 +84,8 @@ class EventFeed(ICalFeed):
 
     def items(self):
         if event_types := self.request.GET.get('event_type'):
-            return Event.objects.filter(id=10305, visible=True, event_type__in=event_types.split(','))
-        return Event.objects.filter(id=10305, visible=True)
+            return Event.objects.filter(visible=True, event_type__in=event_types.split(','))
+        return Event.objects.filter(visible=True)
 
     def item_location(self, item: Event) -> str:
         return item.address
