@@ -8,6 +8,8 @@ import { useRoute } from "vue-router";
 const model = defineModel();
 
 const isFormValid = ref(false);
+const submitting = ref(false);
+const success = ref(false);
 
 const obj = ref({
     event_type: 'ball',
@@ -31,23 +33,6 @@ const obj = ref({
 
 const isNewEvent = ref(true);
 const loading = ref(false);
-
-// function getCookie(name) {
-//     let cookieValue = null;
-//     console.log(document.cookie);
-//     if (document.cookie && document.cookie !== '') {
-//         const cookies = document.cookie.split(';');
-//         for (let i = 0; i < cookies.length; i++) {
-//             const cookie = cookies[i].trim();
-//             // Does this cookie string begin with the name we want?
-//             if (cookie.substring(0, name.length + 1) === (name + '=')) {
-//                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-//                 break;
-//             }
-//         }
-//     }
-//     return cookieValue;
-// }
 
 async function loadExistingEvent(id) {
     var response = await axios.get('/events/' + id + '/');
@@ -347,12 +332,9 @@ function getDatesToSelect(){
     return datesToSelect
 }
 
-
-
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 
 async function submit(event) {
-    // console.log(isFormValid);
-    // console.log(obj.value)
 
     if (isFormValid.value == true) {
         let postData = {
@@ -375,34 +357,39 @@ async function submit(event) {
         // console.log(postData);
         // { headers: { 'X - CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value } }
 
+        let redirectTo = "";
+
+        submitting.value = true;
+        loading.value = true;
+
+        await sleep(1000);
+
         if (obj.value.id == -1) {
             // Submit new event
-            loading.value = true
             axios.post('/events/create', postData)
                 .then((response) => {
-                    loading.value = false;
-                    // console.log(response.data);
-                    // window.open(response.data['balfolk_music_url']);
-                    window.location.href = response.data['balfolk_music_url'];
+                    redirectTo = response.data['balfolk_music_url'];
                 }, (error) => {
-                    loading.value = false;
                     console.log(error);
+                    return;
                 });
 
         } else {
             // Edit existing event
-            loading.value = true
             axios.put('/events/' + obj.value.id + '/', postData)
                 .then((response) => {
-                    loading.value = false;
-                    // console.log(response.data);
-                    // window.open(response.data['balfolk_music_url']);
-                    window.location.href = response.data['balfolk_music_url'];
+                    redirectTo = response.data['balfolk_music_url'];
                 }, (error) => {
-                    loading.value = false;
                     console.log(error);
+                    return;
                 });
         }
+
+        loading.value = false;
+        submitting.value = false;
+        success.value = true;
+        await sleep(2000);
+        window.location.href = redirectTo;
 
     } else {
         alert('Form is not valid');
@@ -418,7 +405,8 @@ const rules = {
 <template>
     <v-sheet class="mx-auto">
         <h1>{{ isNewEvent? 'Add a new event' : 'Edit existing event: ' + obj.name }}</h1>
-        <p>Fill in the information below to add a new event to the site.</p>
+        <p v-if="isNewEvent">Fill in the information below to add a new event to the site and save at the bottom of the page.</p>
+        <p v-if="!isNewEvent">Update the information of the event below and save at the bottom of the page.</p>
         <v-divider class="ma-4"></v-divider>
         <v-form v-model="isFormValid" @submit.prevent="submit">
 
@@ -485,21 +473,31 @@ const rules = {
                         label="Facebook event link"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="12" md="6" lg="6">
-                    <v-text-field prepend-inner-icon="mdi-image" v-model="obj.banner"
-                        label="Banner image link"></v-text-field>
+                    <v-text-field prepend-inner-icon="mdi-image" v-model="obj.banner" label="Banner image link"></v-text-field>
+                    <v-container v-if="obj.banner">
+                        <h5>Banner image preview:</h5>
+                        <v-img cover :src="obj.banner"></v-img>
+                    </v-container>
                 </v-col>
                 <v-col cols="12" sm="12" md="6" lg="6">
-                    <v-text-field prepend-inner-icon="mdi-image" v-model="obj.poster"
-                        label="Poster image link"></v-text-field>
+                    <v-text-field prepend-inner-icon="mdi-image" v-model="obj.poster" label="Poster image link"></v-text-field>
+                    <v-container v-if="obj.poster">
+                        <h5>Poster image preview:</h5>
+                        <v-img cover :src="obj.poster"></v-img>
+                    </v-container>
                 </v-col>
             </v-row>
+
+            <br>
 
             <p>Provide some information about the schedule or line-up of the event. Which bands are playing at what time? Is there an initiation?</p>
             <v-textarea prepend-inner-icon="mdi-clock-outline" v-model="obj.schedule" auto-grow label="Schedule information"></v-textarea>
             <p>Provide some information about the ticket prices and formulas.</p>
             <v-textarea prepend-inner-icon="mdi-ticket" v-model="obj.pricing" auto-grow label="Pricing information"></v-textarea>
 
-            <v-alert type="warning" v-if="!isFormValid" text="There are errors on the form. Fix these before you can submit."></v-alert>
+            <v-alert type="warning" v-if="!isFormValid" text="There are errors on the form, or not all required data is provided. Please fix these before you can submit."></v-alert>
+            <v-progress-linear :active="submitting" color="deep-purple" height="4" indeterminate></v-progress-linear>
+            <v-alert type="success" v-if="success" text="Success. Redirecting you to event page ..."></v-alert>
 
             <v-btn :disabled="!isFormValid" color="blue"  type="submit" block class="mt-2">Save</v-btn>
         </v-form>

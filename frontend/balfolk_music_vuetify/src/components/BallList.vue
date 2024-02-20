@@ -2,8 +2,7 @@
         <v-progress-linear :active="loading" color="deep-purple" height="4" indeterminate></v-progress-linear>
 
         <!-- Search box -->
-        <v-text-field class="py-3" v-model="search" hide-details placeholder="Search" prepend-inner-icon="mdi-magnify"
-            variant="underlined"></v-text-field>
+        <v-text-field class="pb-3" v-model="search" hide-details placeholder="Search" prepend-inner-icon="mdi-magnify" variant="underlined"></v-text-field>
 
         <!-- Tabs header -->
         <v-tabs v-model="tab" fixed-tabs>
@@ -12,7 +11,7 @@
         </v-tabs>
 
         <!-- Tab content -->
-        <v-window v-model="tab">
+        <v-window v-model="tab"> ''
             <v-window-item value=upcoming>
                 <v-container>
                     <v-data-iterator :items="get_upcoming_events(objects)" :items-per-page="20" :search="search">

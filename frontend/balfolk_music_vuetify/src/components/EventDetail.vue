@@ -31,7 +31,7 @@ function getDayName(date) {
     return date.toLocaleDateString('en-US', { weekday: 'short' });
 }
 
-const dateFormat = {  timeZone: 'UTC', weekday: "long", year: "numeric", month: "short", day: "numeric" };
+const dateFormat = {  timeZone: 'UTC', weekday: "long", month: "short", day: "numeric" };
 const timeFormat = { timeStyle: 'short'};
 
 function formatMultiDayEventDate(start, stop) {
@@ -100,7 +100,7 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
 
         <v-img cover max-height="250" :src="obj.banner_image_url"></v-img>
 
-        <v-sheet rounded class="d-flex" color="grey-lighten-3">
+        <v-sheet rounded color="grey-lighten-3">
             <v-row align="center" no-gutters>
                 <!-- Date rectangle -->
                 <v-col
@@ -127,9 +127,11 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
         </v-sheet>
 
         <v-card-item>
-            <v-card-subtitle>{{ obj.event_type_display }}<span v-if="obj.organizer"> by {{ obj.organizer
-            }}</span></v-card-subtitle>
-            <v-card-subtitle v-html="formatMultiDayEventDate(obj.starting_datetime, obj.ending_datetime)"></v-card-subtitle>
+            <v-card-subtitle>
+                {{ obj.event_type_display }}<span v-if="obj.organizer"> by {{ obj.organizer }}</span>
+                <br>
+                {{ formatMultiDayEventDate(obj.starting_datetime, obj.ending_datetime) }}
+            </v-card-subtitle>
         </v-card-item>
 
         <v-divider></v-divider>
@@ -176,32 +178,23 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
                         </v-btn>
                     </a>
                 </v-col>
-                    <v-col cols="auto">
-                        <router-link style="text-decoration: none; color: inherit;" :to="{ name: 'EventEdit', params: { id: obj.id } }">
-                            <v-btn variant="text" prepend-icon="mdi-calendar-edit">
-                                <template v-slot:prepend>
-                                    <v-icon></v-icon>
-                                </template>
-                                Edit this event
-                            </v-btn>
-                        </router-link>
-                    </v-col>
             </v-row>
         </v-container>
 
         <v-divider></v-divider>
 
+        <div v-if="obj.description">
         <v-card-title><v-icon size="medium" icon="mdi-information"></v-icon> Information</v-card-title>
         <v-card-text style="white-space: pre-line;">
             {{ obj.description }}
         </v-card-text>
+        </div>
 
         <div v-if="obj.poster_image">
             <v-divider></v-divider>
             <v-card-title><v-icon size="medium" icon="mdi-image"></v-icon> Poster</v-card-title>
             <v-container class="fill-height" fluid>
                 <v-img cover :src="obj.poster_image"></v-img>
-
             </v-container>
         </div>
 
@@ -238,5 +231,23 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
                     </div>
                 </v-card-text>
             </div>
-    </div>
+        </div>
+
+
+        <v-divider></v-divider>
+            <v-container>
+                <v-row dense justify="center" align="center">
+                    <v-col cols="auto">
+                        <router-link style="text-decoration: none; color: inherit;" :to="{ name: 'EventEdit', params: { id: obj.id } }">
+                            <v-btn variant="text" prepend-icon="mdi-calendar-edit">
+                                <template v-slot:prepend>
+                                    <v-icon></v-icon>
+                                </template>
+                                Edit this event
+                            </v-btn>
+                        </router-link>
+                    </v-col>
+                </v-row>
+            </v-container>
+
 </v-card></template>
