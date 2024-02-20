@@ -2,7 +2,6 @@
 import arrow
 from django.views.generic import ListView
 from django_ical.views import ICalFeed
-from traitlets import Instance
 from .models import Festival, Ball, Course, Event, EventDate
 from rest_framework.views import APIView
 from .api.serializers import EventSerializer
