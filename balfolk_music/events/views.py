@@ -1,23 +1,30 @@
 
 import arrow
-from django.views.generic import ListView
 from django_ical.views import ICalFeed
-from .models import Festival, Ball, Course, Event, EventDate
+from .models import Event, EventDate
 from rest_framework.views import APIView
-from .api.serializers import EventSerializer
+from .api.serializers import EventDetailSerializer, EventListSerializer
 from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+from rest_framework import generics
 from django.conf import settings
 from rest_framework import serializers, status
+from django_filters import rest_framework as filters
 
 
-class FestivalsIndexView(ListView):
-    template_name = 'events/festivals_index.html'
-    model = Festival
-
-    def get_queryset(self):
-        return self.model.objects.filter(visible=True).order_by('start_timestamp')
+class EventListView(generics.ListAPIView):
+    queryset = Event.objects.filter(visible=True).only(
+        'id',
+        'name',
+        'starting_datetime',
+        'ending_datetime',
+        'banner_image',
+        'city',
+        'country',
+        'event_type',
+    )
+    serializer_class = EventListSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('event_type', )
 
 
 class EventAPICreateEditView(APIView):
@@ -28,7 +35,6 @@ class EventAPICreateEditView(APIView):
         Create or update the Event with given data
         '''
         input_data = dict(request.data)
-        # input_data['visible'] = False
 
         # Preprocess the input data to create the dates
         date_pks = []
@@ -40,12 +46,11 @@ class EventAPICreateEditView(APIView):
         # Update existing instance if requested
         instance = None
         if pk:
-            instance = Event.objects.get(pk=pk)
+            instance = Event.objects.get(pk=pk, visible=True)
 
-        serializer = EventSerializer(instance=instance, data=input_data)
+        serializer = EventDetailSerializer(instance=instance, data=input_data)
         if serializer.is_valid():
             obj = serializer.save()
-            # print(f'Created {obj}')
             if pk:
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -53,8 +58,8 @@ class EventAPICreateEditView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, pk, *args, **kwargs):
-        obj = Event.objects.filter(pk=pk).first()
-        serializer = EventSerializer(obj)
+        obj = Event.objects.filter(pk=pk, visible=True).first()
+        serializer = EventDetailSerializer(obj)
         data = serializer.data
         data['dates'] = [arrow.get(d.date).date().isoformat() for d in EventDate.objects.filter(id__in=data['dates'])]
         return Response(data, status=status.HTTP_200_OK)
@@ -79,8 +84,8 @@ class EventFeed(ICalFeed):
 
     def items(self):
         if event_types := self.request.GET.get('event_type'):
-            return Event.objects.filter(event_type__in=event_types).order_by('id').prefetch_related('dates')
-        return Event.objects.all().order_by('id').prefetch_related('dates')
+            return Event.objects.filter(visible=True, event_type__in=event_types).order_by('id')
+        return Event.objects.filter(visible=True).order_by('id')
 
     def item_location(self, item: Event) -> str:
         return item.address
@@ -98,10 +103,10 @@ class EventFeed(ICalFeed):
         return item.description
 
     def item_start_datetime(self, item: Event):
-        return item.start
+        return item.starting_datetime
 
     def item_end_datetime(self, item: Event):
-        return item.end
+        return item.ending_datetime
 
     def item_link(self, item: Event) -> str:
         if item.event_type == Event.Type.BALL:
@@ -124,7 +129,7 @@ class EventDetailFeed(EventFeed):
 
     def items(self):
         pk = self.request.resolver_match.kwargs['pk']
-        self.obj = Event.objects.filter(id=pk).prefetch_related('dates').first()
+        self.obj = Event.objects.filter(id=pk, visible=True).prefetch_related('dates').first()
         if not self.obj:
             raise Exception('unknown object')
         return [self.obj]

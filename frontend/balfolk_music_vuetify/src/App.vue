@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-container>
-      <v-app-bar scroll-behavior="collapse" :elevation="2" color="teal-darken-4"
+      <v-app-bar scroll-behavior="collapse" density="compact" :elevation="2" color="teal-darken-4"
         image="https://picsum.photos/1920/1080?random">
 
         <template v-slot:image>

@@ -30,3 +30,4 @@ tenacity
 requests
 django-ical
 drf-orjson-renderer
+django-filter

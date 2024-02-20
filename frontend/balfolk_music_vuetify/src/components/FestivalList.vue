@@ -4,10 +4,10 @@
     <v-progress-linear :active="loading" color="deep-purple" height="4" indeterminate></v-progress-linear>
 
     <!-- Search box -->
-    <v-text-field class="pb-3" v-model="search" hide-details placeholder="Search" prepend-inner-icon="mdi-magnify" variant="underlined"></v-text-field>
+    <v-text-field class="pb-1" v-model="search" hide-details placeholder="Search" prepend-inner-icon="mdi-magnify" variant="underlined"></v-text-field>
 
     <!-- Tabs header -->
-    <v-tabs v-model="tab" fixed-tabs>
+    <v-tabs v-model="tab" fixed-tabs class="mb-3">
         <v-tab value=upcoming>Upcoming</v-tab>
         <v-tab value=past>Past</v-tab>
     </v-tabs>
@@ -15,60 +15,56 @@
     <!-- Tab content -->
     <v-window v-model="tab">
         <v-window-item value=upcoming>
-            <v-container fluid>
-                <v-data-iterator :items="get_upcoming_events(objects)" :items-per-page="20" :search="search">
-                    <template v-slot:default="{ items }">
-                        <v-row dense>
-                            <FestivalCard v-for="item in items" :key="item.raw.id" :id="item.raw.id" :name="item.raw.name"
-                                :city="item.raw.city" :country_name="item.raw.country_name" :image="item.raw.image_url"
-                                :banner_image_url="item.raw.banner_image_url" :start_timestamp="item.raw.starting_datetime"
-                                :end_timestamp="item.raw.ending_datetime" />
-                        </v-row>
-                    </template>
+            <v-data-iterator :items="get_upcoming_events(objects)" :items-per-page="30" :search="search">
+                <template v-slot:default="{ items }">
+                    <v-row dense>
+                        <FestivalCard v-for="item in items" :key="item.raw.id" :id="item.raw.id" :name="item.raw.name"
+                            :city="item.raw.city" :country_name="item.raw.country_name" :image="item.raw.image_url"
+                            :banner_image_url="item.raw.banner_image_url" :start_timestamp="item.raw.starting_datetime"
+                            :end_timestamp="item.raw.ending_datetime" />
+                    </v-row>
+                </template>
 
-                    <template v-slot:footer="{ page, pageCount, prevPage, nextPage }">
-                        <div class="d-flex align-center justify-center pa-4">
-                            <v-btn :disabled="page === 1" icon="mdi-arrow-left" density="comfortable" variant="tonal"
-                                rounded @click="prevPage"></v-btn>
+                <template v-slot:footer="{ page, pageCount, prevPage, nextPage }">
+                    <div class="d-flex align-center justify-center pa-4">
+                        <v-btn :disabled="page === 1" icon="mdi-arrow-left" density="comfortable" variant="tonal" rounded
+                            @click="prevPage"></v-btn>
 
-                            <div class="mx-2 text-caption">
-                                Page {{ page }} of {{ pageCount }}
-                            </div>
-
-                            <v-btn :disabled="page >= pageCount" icon="mdi-arrow-right" density="comfortable"
-                                variant="tonal" rounded @click="nextPage"></v-btn>
+                        <div class="mx-2 text-caption">
+                            Page {{ page }} of {{ pageCount }}
                         </div>
-                    </template>
-                </v-data-iterator>
-            </v-container>
+
+                        <v-btn :disabled="page >= pageCount" icon="mdi-arrow-right" density="comfortable" variant="tonal"
+                            rounded @click="nextPage"></v-btn>
+                    </div>
+                </template>
+            </v-data-iterator>
         </v-window-item>
         <v-window-item value=past>
-            <v-container fluid>
-                <v-data-iterator :items="get_past_events(objects)" :items-per-page="20" :search="search">
-                    <template v-slot:default="{ items }">
-                        <v-row dense>
-                            <FestivalCard v-for="item in items" :key="item.raw.id" :id="item.raw.id" :name="item.raw.name"
-                                :city="item.raw.city" :country_name="item.raw.country_name" :image="item.raw.image_url"
-                                :banner_image_url="item.raw.banner_image_url" :start_timestamp="item.raw.starting_datetime"
-                                :end_timestamp="item.raw.ending_datetime" />
-                        </v-row>
-                    </template>
+            <v-data-iterator :items="get_past_events(objects)" :items-per-page="30" :search="search">
+                <template v-slot:default="{ items }">
+                    <v-row dense>
+                        <FestivalCard v-for="item in items" :key="item.raw.id" :id="item.raw.id" :name="item.raw.name"
+                            :city="item.raw.city" :country_name="item.raw.country_name" :image="item.raw.image_url"
+                            :banner_image_url="item.raw.banner_image_url" :start_timestamp="item.raw.starting_datetime"
+                            :end_timestamp="item.raw.ending_datetime" />
+                    </v-row>
+                </template>
 
-                    <template v-slot:footer="{ page, pageCount, prevPage, nextPage }">
-                        <div class="d-flex align-center justify-center pa-4">
-                            <v-btn :disabled="page === 1" icon="mdi-arrow-left" density="comfortable" variant="tonal"
-                                rounded @click="prevPage"></v-btn>
+                <template v-slot:footer="{ page, pageCount, prevPage, nextPage }">
+                    <div class="d-flex align-center justify-center pa-4">
+                        <v-btn :disabled="page === 1" icon="mdi-arrow-left" density="comfortable" variant="tonal" rounded
+                            @click="prevPage"></v-btn>
 
-                            <div class="mx-2 text-caption">
-                                Page {{ page }} of {{ pageCount }}
-                            </div>
-
-                            <v-btn :disabled="page >= pageCount" icon="mdi-arrow-right" density="comfortable"
-                                variant="tonal" rounded @click="nextPage"></v-btn>
+                        <div class="mx-2 text-caption">
+                            Page {{ page }} of {{ pageCount }}
                         </div>
-                    </template>
-                </v-data-iterator>
-            </v-container> æ
+
+                        <v-btn :disabled="page >= pageCount" icon="mdi-arrow-right" density="comfortable" variant="tonal"
+                            rounded @click="nextPage"></v-btn>
+                    </div>
+                </template>
+            </v-data-iterator>
         </v-window-item>
     </v-window>
 </template>
@@ -84,7 +80,7 @@ const loading = ref(true);
 
 async function fetchData() {
     loading.value = true;
-    var response = await axios.get("/api/festivals/");
+    var response = await axios.get("/events/?event_type=festival");
     objects.value = response.data;
     // console.log(objects);
     loading.value = false;
