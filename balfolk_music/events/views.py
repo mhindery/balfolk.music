@@ -84,8 +84,8 @@ class EventFeed(ICalFeed):
 
     def items(self):
         if event_types := self.request.GET.get('event_type'):
-            return Event.objects.filter(visible=True, event_type__in=event_types.split(',')).order_by('id')
-        return Event.objects.filter(visible=True).order_by('id')
+            return Event.objects.filter(id=10305, visible=True, event_type__in=event_types.split(','))
+        return Event.objects.filter(id=10305, visible=True)
 
     def item_location(self, item: Event) -> str:
         return item.address
@@ -131,7 +131,7 @@ class EventDetailFeed(EventFeed):
 
     def items(self):
         pk = self.request.resolver_match.kwargs['pk']
-        self.obj = Event.objects.filter(id=pk, visible=True).prefetch_related('dates').first()
+        self.obj = Event.objects.filter(id=pk, visible=True).first()
         if not self.obj:
             raise Exception('unknown object')
         return [self.obj]
