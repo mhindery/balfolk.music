@@ -13,6 +13,8 @@ import CourseList from '../components/CourseList.vue'
 import EventAddEdit from '../components/EventAddEdit.vue'
 import Calendar from '../components/Calendar.vue'
 import Playlists from '../components/Playlists.vue'
+import ICalFeed from '../components/ICalFeed.vue'
+
 // import { setupLayouts } from 'virtual:generated-layouts'
 
 const routes = [
@@ -26,7 +28,9 @@ const routes = [
   { path: '/add/', name: 'EventAdd', meta: {title: 'Balfolk.music > Add new event'}, component: EventAddEdit, props: true },
   { path: '/edit/:id/', name: 'EventEdit', meta: { title: 'Balfolk.music > Edit event' }, component: EventAddEdit, props: true },
   { path: '/calendar/', name: 'Calendar', meta: {title: 'Balfolk.music > Calendar'}, component: Calendar, props: true },
+  { path: '/icalfeed/', name: 'ICalFeed', meta: { title: 'Balfolk.music > ICal feed' }, component: ICalFeed, props: true },
   { path: '/playlists/', name: 'Playlists', meta: {title: 'Balfolk.music > Playlists'}, component: Playlists, props: true },
+
 ]
 
 const router = createRouter({
