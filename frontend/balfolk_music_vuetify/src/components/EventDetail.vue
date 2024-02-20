@@ -2,6 +2,7 @@
 const props = defineProps(['id', 'apiURL']);
 
 import { ref } from 'vue';
+import { getDayOfMonthStart, getWeekdayStart, getMonthStart } from "@/utils/utils";
 import axios from 'axios'
 
 const obj = ref({});
@@ -63,27 +64,10 @@ function formatLocation(obj) {
     return obj.city
 }
 
-function getWeekdayStart(obj) {
-    let date = new Date(obj.starting_datetime);
-    return date.toLocaleDateString('en-US', { weekday: 'short' });
-}
-
-function getDayOfMonthStart(obj) {
-    let date = new Date(obj.starting_datetime);
-    return date.getDate();
-}
-
-function getMonthStart(obj) {
-    let date = new Date(obj.starting_datetime);
-    return date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-}
-
 function getYearStart(obj) {
     let date = new Date(obj.starting_datetime);
     return date.getFullYear();
 }
-
-
 
 import L from 'leaflet';
 globalThis.L = L;
@@ -91,8 +75,6 @@ globalThis.L = L;
 
 import "leaflet/dist/leaflet.css";
 import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
-
-
 </script>
 
 <template>

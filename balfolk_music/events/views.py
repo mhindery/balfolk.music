@@ -21,10 +21,10 @@ class EventListView(generics.ListAPIView):
         'city',
         'country',
         'event_type',
-    )
+    ).order_by('starting_datetime')
     serializer_class = EventListSerializer
     filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ('event_type', )
+    filterset_fields = ('event_type', 'country')
 
 
 class EventAPICreateEditView(APIView):
