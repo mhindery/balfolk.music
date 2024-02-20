@@ -84,14 +84,16 @@ class EventFeed(ICalFeed):
 
     def items(self):
         if event_types := self.request.GET.get('event_type'):
-            return Event.objects.filter(visible=True, event_type__in=event_types).order_by('id')
+            return Event.objects.filter(visible=True, event_type__in=event_types.split(',')).order_by('id')
         return Event.objects.filter(visible=True).order_by('id')
 
     def item_location(self, item: Event) -> str:
         return item.address
 
     def item_geolocation(self, item: Event) -> str:
-        return (item.lattitude, item.longitude)
+        if item.longitude:
+            return (item.lattitude, item.longitude)
+        return None
 
     def item_guid(self, item: Event) -> str:
         return f'balfolk_event_{item.id}'
