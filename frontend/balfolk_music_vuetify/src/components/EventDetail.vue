@@ -81,12 +81,10 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet";
 </script>
 
 <template>
-    <v-progress-linear :active="loading" color="deep-purple" height="4" indeterminate></v-progress-linear>
-
-
-    <v-card class="mx-auto my-12">
+    <v-card class="mx-auto">
 
         <div v-if="loading">
+            <v-progress-linear color="deep-purple" class="mb-4" height="4" indeterminate></v-progress-linear>
             <v-skeleton-loader type="card, article"></v-skeleton-loader>
         </div>
 

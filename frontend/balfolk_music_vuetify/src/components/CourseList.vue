@@ -1,6 +1,4 @@
 <template>
-    <!-- <v-progress-linear :active="loading" color="deep-purple" height="4" indeterminate></v-progress-linear> -->
-
     <div>
         <!-- Search box -->
         <v-text-field class="pb-1" v-model="search" hide-details placeholder="Search" prepend-inner-icon="mdi-magnify"
