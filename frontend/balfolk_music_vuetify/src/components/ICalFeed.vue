@@ -37,7 +37,7 @@ const icalLink = ref('');
 
 function constructIcalLink(selectedValues) {
     let event_types = eventTypeSelected.value.join(',');
-    icalLink.value = location.protocol + '//' + location.hostname + ':' + location.port + '/events/feed.ics' + '?event_type=' + event_types;
+    icalLink.value = location.protocol + '//' + location.hostname + '/events/feed.ics' + '?event_type=' + event_types;
 }
 
 constructIcalLink()
