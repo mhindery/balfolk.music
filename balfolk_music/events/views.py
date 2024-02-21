@@ -3,12 +3,25 @@ import arrow
 from django_ical.views import ICalFeed
 from .models import Event, EventDate
 from rest_framework.views import APIView
-from .api.serializers import EventDetailSerializer, EventListSerializer
+from .api.serializers import EventDetailSerializer, EventListSerializer, CalendarListSerializer
 from rest_framework.response import Response
 from rest_framework import generics
 from django.conf import settings
 from rest_framework import serializers, status
 from django_filters import rest_framework as filters
+from django_filters import MultipleChoiceFilter
+from django_filters.fields import MultipleChoiceField
+import pycountry
+
+
+class EventFilter(filters.FilterSet):
+    # event_type = MultipleCharFilter(field_name="event_type", lookup_expr="contains")
+    event_type = MultipleChoiceFilter(choices=Event.Type.choices)
+    country = MultipleChoiceField(choices=[(x.alpha_2, x.name) for x in pycountry.countries])
+
+    class Meta:
+        model = Event
+        fields = ['event_type', 'country']
 
 
 class EventListView(generics.ListAPIView):
@@ -24,7 +37,21 @@ class EventListView(generics.ListAPIView):
     ).order_by('starting_datetime')
     serializer_class = EventListSerializer
     filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ('event_type', 'country')
+    filterset_class = EventFilter
+
+
+class CalendarEventListView(generics.ListAPIView):
+    queryset = Event.objects.filter(visible=True).only(
+        'id',
+        'name',
+        'starting_datetime',
+        'ending_datetime',
+        'country',
+        'event_type',
+    )
+    serializer_class = CalendarListSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = EventFilter
 
 
 class EventAPICreateEditView(APIView):

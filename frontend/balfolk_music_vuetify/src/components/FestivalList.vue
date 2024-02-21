@@ -1,7 +1,7 @@
 <template>
-    <v-progress-linear :active="loading" color="deep-purple" height="4" indeterminate></v-progress-linear>
+    <!-- <v-progress-linear :active="loading" color="deep-purple" height="4" indeterminate></v-progress-linear> -->
 
-    <div v-if="!loading">
+    <div>
         <!-- Search box -->
         <v-text-field class="pb-1" v-model="search" hide-details placeholder="Search" prepend-inner-icon="mdi-magnify"
             variant="underlined"></v-text-field>
@@ -14,6 +14,13 @@
 
         <!-- Tab content -->
         <v-window v-model="tab">
+            <div v-if="loading">
+                <v-row dense>
+                    <v-col v-for="x in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0]" cols="12" lg="4" md="6" sm="12">
+                        <v-skeleton-loader type="list-item-avatar-three-line"></v-skeleton-loader>
+                    </v-col>
+                </v-row>
+            </div>
             <v-window-item value=upcoming>
                 <v-data-iterator :items="get_upcoming_events(objects)" :items-per-page="30" :search="search">
                     <template v-slot:default="{ items }">

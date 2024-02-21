@@ -15,7 +15,7 @@ else:
 # router.register('festivals', FestivalViewSet, basename='festival')
 # router.register('courses', CourseViewSet, basename='course')
 # router.register('balls', BallViewSet, basename='ball')
-router.register('calendar_events', CalendarEventViewSet, basename='calendar_event')
+# router.register('calendar_events', CalendarEventViewSet, basename='calendar_event')
 router.register('playlists', PlaylistViewSet, basename='playlist')
 # router.register('songs', SongViewSet, basename='song')
 
