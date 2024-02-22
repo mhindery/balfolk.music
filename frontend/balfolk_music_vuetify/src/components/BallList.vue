@@ -23,7 +23,7 @@
         </v-row>
 
         <!-- Tabs header -->
-        <v-tabs v-model="tab" fixed-tabs class="mb-3">
+        <v-tabs v-model="tab" grow class="mb-3">
             <v-tab value=upcoming>Upcoming</v-tab>
             <v-tab value=past>Past</v-tab>
         </v-tabs>

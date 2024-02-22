@@ -1,3 +1,4 @@
+rm -r staticfiles && \
 cd ./frontend/balfolk_music_vuetify && \
 yarn run build && \
 perl -pi -e s,/assets/,https://mhindery.github.io/balfolk.music/staticfiles/,g dist/index.html && \
