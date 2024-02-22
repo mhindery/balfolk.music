@@ -79,7 +79,7 @@
                     </template>
 
 
-                    <template v-slot:footer="{ page, pageCount, prevPage, nextPage }">
+                    <template v-if="get_upcoming_events(objects).length >= 30"  v-slot:footer="{ page, pageCount, prevPage, nextPage }">
                         <div class="d-flex align-center justify-center pa-4">
                             <v-btn :disabled="page === 1" icon="mdi-arrow-left" density="comfortable" variant="tonal"
                                 rounded @click="prevPage"></v-btn>
@@ -136,7 +136,7 @@
                     </template>
 
 
-                    <template v-slot:footer="{ page, pageCount, prevPage, nextPage }">
+                    <template v-if="get_past_events(objects).length >= 30"  v-slot:footer="{ page, pageCount, prevPage, nextPage }">
                         <div class="d-flex align-center justify-center pa-4">
                             <v-btn :disabled="page === 1" icon="mdi-arrow-left" density="comfortable" variant="tonal"
                                 rounded @click="prevPage"></v-btn>
