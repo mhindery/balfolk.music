@@ -1,8 +1,26 @@
 <template>
     <div>
         <!-- Search box -->
-        <v-text-field class="pb-1" v-model="search" hide-details placeholder="Search" prepend-inner-icon="mdi-magnify"
-            variant="underlined"></v-text-field>
+        <v-row>
+            <v-col cols="6">
+                <v-text-field v-model="search" placeholder="Search" prepend-inner-icon="mdi-magnify"
+                    variant="underlined"></v-text-field>
+            </v-col>
+            <v-col cols="6">
+                <v-select variant="underlined" label="Country" v-model="countriesSelected" item-value="alpha_2"
+                    item-title="name" multiple :items="getCountriesToSelect()" @update:modelValue="refreshEventData()">
+
+                    <template v-slot:selection="{ item, index }">
+                        <v-chip v-if="index < 3">
+                            <span>{{ item.title }}</span>
+                        </v-chip>
+                        <span v-if="index === 3" class="text-grey text-caption align-self-center">
+                            (+{{ countriesSelected.length - 3 }} others)
+                        </span>
+                    </template>
+                </v-select>
+            </v-col>
+        </v-row>
 
         <!-- Tabs header -->
         <v-tabs v-model="tab" fixed-tabs class="mb-3">
@@ -78,14 +96,20 @@
 <script setup>
 import FestivalCard from './FestivalCard.vue';
 import { ref, onMounted } from 'vue';
-import { get_upcoming_events, get_past_events, fetchEventData } from "@/utils/utils";
+import { get_upcoming_events, get_past_events, getCountriesToSelect, fetchEventData } from "@/utils/utils";
 
 const objects = ref([]);
 const loading = ref(true);
 const tab = ref(0);
 const search = ref('');
+const countriesSelected = ref(['BE']);
 
 onMounted(
-    () => fetchEventData('festival', objects, loading)
+    () => refreshEventData()
 );
+
+function refreshEventData() {
+    fetchEventData('festival', objects, loading, countriesSelected.value);
+}
+
 </script>

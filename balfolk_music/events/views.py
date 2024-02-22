@@ -17,7 +17,7 @@ import pycountry
 class EventFilter(filters.FilterSet):
     # event_type = MultipleCharFilter(field_name="event_type", lookup_expr="contains")
     event_type = MultipleChoiceFilter(choices=Event.Type.choices)
-    country = MultipleChoiceField(choices=[(x.alpha_2, x.name) for x in pycountry.countries])
+    country = MultipleChoiceFilter(choices=[(x.alpha_2, x.name) for x in pycountry.countries])
 
     class Meta:
         model = Event
