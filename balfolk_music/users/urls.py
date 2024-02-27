@@ -1,10 +1,6 @@
 from django.urls import path
 
-from balfolk_music.users.views import (
-    user_detail_view,
-    user_redirect_view,
-    user_update_view,
-)
+from balfolk_music.users.views import user_detail_view, user_redirect_view, user_update_view
 
 app_name = "users"
 urlpatterns = [

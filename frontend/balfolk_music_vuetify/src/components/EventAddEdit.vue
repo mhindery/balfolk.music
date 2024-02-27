@@ -4,7 +4,7 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRoute } from "vue-router";
-import { getCountriesToSelect  } from "@/utils/utils"; 
+import { getCountriesToSelect  } from "@/utils/utils";
 
 const model = defineModel();
 
@@ -64,7 +64,7 @@ if ('id' in routeParams) {
     isNewEvent.value = false;
     loadExistingEvent(routeParams.id);
 } else {
-    
+
 }
 
 function getDatesToSelect(){

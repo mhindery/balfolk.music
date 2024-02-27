@@ -1,28 +1,30 @@
+import re
+
+import arrow
 import requests
 from bs4 import BeautifulSoup
-from tqdm import tqdm
-import arrow
-import re
-from balfolk_music.events.models import Ball, Course, Event, Festival, EventDate
 from tenacity import retry, stop_after_attempt, wait_exponential
+from tqdm import tqdm
+
+from balfolk_music.events.models import Ball, Course, Event, EventDate
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
 def fetch_site(url):
     entry_response = requests.get(url)
-    soup = BeautifulSoup(entry_response.text, 'html.parser')
+    soup = BeautifulSoup(entry_response.text, "html.parser")
     return soup
 
 
 def get_timestamps(input_string):
-    if input_string == 'Hele dag':
-        return arrow.get('00:00', 'HH:mm').time(), arrow.get('23:59', 'HH:mm').time()
+    if input_string == "Hele dag":
+        return arrow.get("00:00", "HH:mm").time(), arrow.get("23:59", "HH:mm").time()
     start, end = None, None
-    if '-' in input_string:
-        start, end = input_string.split('-')
-    start_ts = arrow.get(start, 'HH:mm')
+    if "-" in input_string:
+        start, end = input_string.split("-")
+    start_ts = arrow.get(start, "HH:mm")
     if end:
-        end_ts = arrow.get(end, 'HH:mm')
+        end_ts = arrow.get(end, "HH:mm")
     else:
         end_ts = start_ts.shift(hours=4)
 
@@ -30,47 +32,44 @@ def get_timestamps(input_string):
 
 
 def get_entry_data(url):
-    # if url == 'https://www.balfolk.nl/agenda/gratis-proefles-lochem/':
-    #     import ipdb
-    #     ipdb.set_trace()
     try:
         soup = fetch_site(url)
-        meta = soup.find(class_='meta')
+        meta = soup.find(class_="meta")
 
-        event_site_header = meta.find(class_='date')
-        event_type = event_site_header.find('em').text.lower()
+        event_site_header = meta.find(class_="date")
+        event_type = event_site_header.find("em").text.lower()
 
-        if event_type == 'bal':
+        if event_type == "bal":
             event_cls = Ball
-        elif event_type == 'overig':
+        elif event_type == "overig":
             event_cls = Ball
-        elif event_type == 'dansen leren':
+        elif event_type == "dansen leren":
             event_cls = Course
-        elif event_type == 'sociales':
+        elif event_type == "sociales":
             event_cls = Course
         else:
-            print(f'Skipping {event_type} ({url})')
+            print(f"Skipping {event_type} ({url})")
             return
 
-        date_str = event_site_header.text.split(' |')[0]
-        event_date = arrow.get(date_str, 'DD-MM-YYYY').datetime
+        date_str = event_site_header.text.split(" |")[0]
+        event_date = arrow.get(date_str, "DD-MM-YYYY").datetime
 
         name = meta.h2.get_text()
         description = meta.p.get_text()
 
-        schedule = '\n'.join(a.get_text() for a in meta.find(class_="bands").find_all('a'))
+        schedule = "\n".join(a.get_text() for a in meta.find(class_="bands").find_all("a"))
 
-        link, site, facebook = '', '', ''
+        link, site, facebook = "", "", ""
         try:
-            link = soup.find(string=re.compile('Meer info »')).parent.parent['href']
-        except:
+            link = soup.find(string=re.compile("Meer info »")).parent.parent["href"]
+        except Exception:
             pass
 
-        if link in ['about:blank#blocked', 'https://']:
-            link = ''
+        if link in ["about:blank#blocked", "https://"]:
+            link = ""
 
         if link:
-            if 'facebook' in link:
+            if "facebook" in link:
                 facebook = link
                 site = url
             else:
@@ -78,16 +77,16 @@ def get_entry_data(url):
         else:
             site = url
 
-        aanvang = soup.find(string=re.compile('Aanvang:')).parent.parent.text.replace('Aanvang:', '').strip()
+        aanvang = soup.find(string=re.compile("Aanvang:")).parent.parent.text.replace("Aanvang:", "").strip()
         start_timestamp, end_timestamp = get_timestamps(aanvang)
 
-        address = soup.find(string=re.compile('Locatie')).parent.parent.text.replace('Locatie: ', '').strip().replace(', ', '\n')
-        if address == '\n,':
-            address = ''
-            city = ''
+        address = soup.find(string=re.compile("Locatie")).parent.parent.text.replace("Locatie: ", "").strip().replace(", ", "\n")
+        if address == "\n,":
+            address = ""
+            city = ""
         else:
-            city = address.split('\n')[-1].split(' ')[-1]
-        country = 'NL'
+            city = address.split("\n")[-1].split(" ")[-1]
+        country = "NL"
 
         if soup.find(class_="lat"):
             lat = float(soup.find(class_="lat").get_text())
@@ -96,17 +95,17 @@ def get_entry_data(url):
             lat = None
             lng = None
 
-        organizer = ''
-        if 'Balfolk café Nijmegen' in name:
-            organizer = 'Folkbal Nijmegen'
+        organizer = ""
+        if "Balfolk café Nijmegen" in name:
+            organizer = "Folkbal Nijmegen"
 
-        banner_image = ''
-        for img in soup.find_all('img'):
-            if img['src'].startswith('https://www.balfolk.nl/wp-content/uploads/'):
-                banner_image = img['src']
+        banner_image = ""
+        for img in soup.find_all("img"):
+            if img["src"].startswith("https://www.balfolk.nl/wp-content/uploads/"):
+                banner_image = img["src"]
                 break
 
-        pricing = soup.find(string=re.compile('Entree: ')).parent.parent.text.replace('Entree: ', '').strip()
+        pricing = soup.find(string=re.compile("Entree: ")).parent.parent.text.replace("Entree: ", "").strip()
 
         event = event_cls.objects.filter(source=Event.Source.BALFOLK_NL, balfolknl_id=url).first()
         if not event:
@@ -142,21 +141,18 @@ def get_entry_data(url):
         event.dates.add(d)
         event.save()
 
-        print(f'Processed {event}')
+        print(f"Processed {event}")
     except Exception as e:
-        # import ipdb
-        # ipdb.set_trace()
         print(url)
         print(e)
 
 
 def get_agenda_entries() -> list[str]:
-    agenda_response = requests.get('https://www.balfolk.nl/agenda/')
-    soup = BeautifulSoup(agenda_response.text, 'html.parser')
-    entries = []
-    for link in soup.find_all('a'):
-        if (href := link.get('href')).startswith('https://www.balfolk.nl/agenda/'):
-            if href != 'https://www.balfolk.nl/agenda/':
+    agenda_response = requests.get("https://www.balfolk.nl/agenda/")
+    soup = BeautifulSoup(agenda_response.text, "html.parser")
+    for link in soup.find_all("a"):
+        if (href := link.get("href")).startswith("https://www.balfolk.nl/agenda/"):
+            if href != "https://www.balfolk.nl/agenda/":
                 yield href
 
 

@@ -1,14 +1,17 @@
 from config.settings.local import ALLOWED_HOSTS
+
 from .base import *  # noqa
 from .base import env
 
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
-SECRET_KEY = env("DJANGO_SECRET_KEY", default='stucwedomxomewqxewm')
+SECRET_KEY = env("DJANGO_SECRET_KEY", default="stucwedomxomewqxewm")
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 # ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["balfolk.music"])
-ALLOWED_HOSTS = ['*', ]
+ALLOWED_HOSTS = [  # noqa: F811
+    "*",
+]
 
 # DATABASES
 # ------------------------------------------------------------------------------
@@ -81,7 +84,7 @@ EMAIL_SUBJECT_PREFIX = env(
 # ADMIN
 # ------------------------------------------------------------------------------
 # Django Admin URL regex.
-ADMIN_URL = env("DJANGO_ADMIN_URL", default='/admin')
+ADMIN_URL = env("DJANGO_ADMIN_URL", default="/admin")
 
 # Anymail
 # ------------------------------------------------------------------------------

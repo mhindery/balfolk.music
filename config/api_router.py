@@ -8,7 +8,7 @@ if settings.DEBUG:
 else:
     router = SimpleRouter()
 
-router.register('playlists', PlaylistViewSet, basename='playlist')
+router.register("playlists", PlaylistViewSet, basename="playlist")
 
 
 app_name = "api"

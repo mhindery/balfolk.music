@@ -3,21 +3,17 @@
 {% load static %}
 
 {% block title %}
-Festivals
-
+  Festivals
 {% endblock title %}
-
 {% block content %}
-<div class="container">
-
+  <div class="container">
     <h1>Festivals</h1>
     <ul>
-        {% for festival in object_list %}
+      {% for festival in object_list %}
         <li>{{ festival }}</li>
-        {% empty %}
+      {% empty %}
         <li>No festivals yet.</li>
-        {% endfor %}
+      {% endfor %}
     </ul>
-
-</div>
+  </div>
 {% endblock content %}

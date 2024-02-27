@@ -86,7 +86,7 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "drf_spectacular",
-    'django_filters',
+    "django_filters",
 ]
 
 LOCAL_APPS = [
@@ -358,4 +358,4 @@ SPECTACULAR_SETTINGS = {
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
-SITE_HOST = env('SITE_HOST', default='http://localhost:8000')
+SITE_HOST = env("SITE_HOST", default="http://localhost:8000")

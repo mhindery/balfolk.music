@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-import pycountry
 from django.utils.translation import gettext_lazy as _
 
 
@@ -24,7 +23,7 @@ class Playlist(models.Model):
     visible = models.BooleanField(default=True)
 
     def __str__(self) -> str:
-        return f'{self.name} ({self.get_platform_display()})'
+        return f"{self.name} ({self.get_platform_display()})"
 
 
 class Song(models.Model):
@@ -48,4 +47,4 @@ class Song(models.Model):
     visible = models.BooleanField(default=True)
 
     def __str__(self) -> str:
-        return f'{self.name} - {self.band} ({self.get_dance_display()})'
+        return f"{self.name} - {self.band} ({self.get_dance_display()})"

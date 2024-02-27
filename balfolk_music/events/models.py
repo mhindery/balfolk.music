@@ -1,18 +1,21 @@
 import arrow
-from django.db import models
-from django.utils import timezone
 import pycountry
 from django.conf import settings
+from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
 class EventDate(models.Model):
     """EventDate represents a date on which an event can occur."""
+
     date = models.DateField(unique=True)
 
     class Meta:
-        ordering = ['date', ]
+        ordering = [
+            "date",
+        ]
 
     def __str__(self) -> str:
         return self.date.isoformat()
@@ -46,7 +49,7 @@ class Event(models.Model):
         if not dates:
             return arrow.get().datetime
         date = dates[0].date
-        return arrow.get(date.isoformat() + ' ' + self.start_timestamp.isoformat()).datetime
+        return arrow.get(date.isoformat() + " " + self.start_timestamp.isoformat()).datetime
 
     @property
     def end(self):
@@ -54,7 +57,7 @@ class Event(models.Model):
         if not dates:
             return arrow.get().datetime
         date = dates[-1].date
-        return arrow.get(date.isoformat() + ' ' + self.end_timestamp.isoformat()).datetime
+        return arrow.get(date.isoformat() + " " + self.end_timestamp.isoformat()).datetime
 
     name = models.CharField(max_length=128)
     description = models.TextField(blank=True)
@@ -64,16 +67,16 @@ class Event(models.Model):
     banner_image = models.URLField(blank=True)
     poster_image = models.URLField(blank=True)
     pricing = models.TextField(blank=True)
-    schedule = models.TextField(blank=True, help_text='Schedule, with e.g. the bands that are playing')
+    schedule = models.TextField(blank=True, help_text="Schedule, with e.g. the bands that are playing")
 
     @property
     def banner_image_url(self):
         if self.banner_image:
             return self.banner_image
-        return 'https://www.creactiviste.fr/storage/2019/10/AsQueerAsFolk-1280x720.png'
+        return "https://www.creactiviste.fr/storage/2019/10/AsQueerAsFolk-1280x720.png"
 
     def ical_link(self):
-        return settings.SITE_HOST + reverse('events:single-event-ical', kwargs={'pk': self.id})
+        return settings.SITE_HOST + reverse("events:single-event-ical", kwargs={"pk": self.id})
 
     # Location todo
     address = models.TextField(blank=True)
@@ -84,17 +87,42 @@ class Event(models.Model):
 
     def fill_country(self):
         if self.folkbende_id and not self.country:
-            self.country = 'BE'
+            self.country = "BE"
         if self.balfolknl_id and not self.country:
-            self.country = 'NL'
+            self.country = "NL"
         if self.city and not self.country:
-            if self.city in ['Leuven', 'Antwerpen', 'Roeselare', 'Waregem', 'Heverlee', 'Watermaal-Bosvoorde', 'Grandmenil', 'Zingem', 'Gooik', 'Aalst', 'Namur', 'Namen', 'Charleroi', 'Uccle', 'Limburg', 'Kortrijk', 'Mechelen', 'Wijgmaal', 'Diest', 'Elsene', 'Belsele', 'Asse', 'Lebbeke', 'Brussels']:
-                self.country = 'BE'
+            if self.city in [
+                "Leuven",
+                "Antwerpen",
+                "Roeselare",
+                "Waregem",
+                "Heverlee",
+                "Watermaal-Bosvoorde",
+                "Grandmenil",
+                "Zingem",
+                "Gooik",
+                "Aalst",
+                "Namur",
+                "Namen",
+                "Charleroi",
+                "Uccle",
+                "Limburg",
+                "Kortrijk",
+                "Mechelen",
+                "Wijgmaal",
+                "Diest",
+                "Elsene",
+                "Belsele",
+                "Asse",
+                "Lebbeke",
+                "Brussels",
+            ]:
+                self.country = "BE"
                 return
 
     def correct_country_to_alpha_2(self):
-        if self.country.lower() == 'turkey':
-            self.country = 'TR'
+        if self.country.lower() == "turkey":
+            self.country = "TR"
             return
 
         matches = pycountry.countries.search_fuzzy(self.country)
@@ -116,21 +144,21 @@ class Event(models.Model):
 
     def get_balfolk_music_url(self) -> str:
         if self.event_type == self.Type.FESTIVAL:
-            return f'/festivals/{self.id}/'
+            return f"/festivals/{self.id}/"
         if self.event_type == self.Type.BALL:
-            return f'/balls/{self.id}/'
+            return f"/balls/{self.id}/"
         if self.event_type == self.Type.COURSE:
-            return f'/courses/{self.id}/'
+            return f"/courses/{self.id}/"
 
         return settings.SITE_HOST
 
     visible = models.BooleanField(default=True)
 
     class Source(models.TextChoices):
-        FOLKBALBENDE = 'folkbalbende', 'FolkBalBende'
-        BALFOLK_NL = 'balfolk.nl', 'Balfolk.nl'
-        FOLKDANCE_PAGE = 'folkdance.page', 'Folkdance.page'
-        WEBSITE = 'website', 'website'
+        FOLKBALBENDE = "folkbalbende", "FolkBalBende"
+        BALFOLK_NL = "balfolk.nl", "Balfolk.nl"
+        FOLKDANCE_PAGE = "folkdance.page", "Folkdance.page"
+        WEBSITE = "website", "website"
 
     source = models.CharField(max_length=24, choices=Source.choices)
     folkbende_id = models.IntegerField(blank=True, null=True)
@@ -138,16 +166,18 @@ class Event(models.Model):
     folkdancepage_id = models.CharField(max_length=512, blank=True, null=True)
 
     def __str__(self) -> str:
-        return f'{self.get_event_type_display()}: {self.name}'
+        return f"{self.get_event_type_display()}: {self.name}"
 
     def fill_geo_info(self):
-        import requests
-        import pycountry
         import urllib.parse
+
+        import pycountry
+        import requests
+
         if self.longitude and self.lattitude:
             try:
                 data = requests.get(
-                    url='http://api.geonames.org/addressJSON?lat={lat}&lng={lng}&username=mhindery'.format(
+                    url="http://api.geonames.org/addressJSON?lat={lat}&lng={lng}&username=mhindery".format(
                         lat=self.lattitude,
                         lng=self.longitude,
                     ),
@@ -156,17 +186,16 @@ class Event(models.Model):
             except Exception as e:
                 print(e)
                 return
-            if 'address' in data:
-                address = data['address']
-                country = pycountry.countries.get(alpha_2=address['countryCode'])
+            if "address" in data:
+                address = data["address"]
+                country = pycountry.countries.get(alpha_2=address["countryCode"])
                 self.country = country.alpha_3
-                self.city = address['locality']
-                self.address = f'{address["street"]} {address["houseNumber"]}, {
-                    address["postalcode"]} {address["locality"]}'
+                self.city = address["locality"]
+                self.address = f'{address["street"]} {address["houseNumber"]}, {address["postalcode"]} {address["locality"]}'
         if self.address:
             try:
                 data = requests.get(
-                    url='http://api.geonames.org/geoCodeAddressJSON?q={q}&username=mhindery'.format(
+                    url="http://api.geonames.org/geoCodeAddressJSON?q={q}&username=mhindery".format(
                         q=urllib.parse.quote(self.address),
                     ),
                     timeout=(2, 10),
@@ -174,14 +203,14 @@ class Event(models.Model):
             except Exception as e:
                 print(e)
                 return
-            if 'address' in data:
-                address = data['address']
-                self.country = address['countryCode']
-                self.lattitude = address['lat']
-                self.longitude = address['lng']
-                self.city = address['locality']
+            if "address" in data:
+                address = data["address"]
+                self.country = address["countryCode"]
+                self.lattitude = address["lat"]
+                self.longitude = address["lng"]
+                self.city = address["locality"]
         if self.address and not self.city:
-            self.city = self.address.split(' ')[-1]
+            self.city = self.address.split(" ")[-1]
 
     def save(self, *args, **kwargs):
         # if not all([self.lattitude, self.longitude, self.address, self.city, self.country]):
