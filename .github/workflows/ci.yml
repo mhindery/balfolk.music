@@ -13,6 +13,7 @@ on:
   push:
     branches: ['master', 'main']
     paths-ignore: ['docs/**']
+    tags: ["*", ".*"]
 
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
@@ -87,6 +88,8 @@ jobs:
             mhindery/balfolk.music
           tags: |
             type=sha
+            type=ref,event=branch
+            type=ref,event=tag
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to Docker Hub
@@ -100,3 +103,23 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           context: .
+
+  helm_deploy:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Render helm
+        run: bash ./script.sh
+      - name: Push to argo
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.GH_TOKEN }}
+        with:
+          source_file: 'server_config/helm/rendered/1.0.0'
+          destination_repo: 'dmnemec/release-test'
+          destination_folder: 'webapp1/1.0.0'
+          user_email: 'mathieu.hinderyckx@gmail.com'
+          user_name: 'mhindery'
+          commit_message: 'webapp1 release version'
