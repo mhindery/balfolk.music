@@ -8,3 +8,5 @@ mkdir rendered/$TAG
 cp -r balfolk_music/ rendered/$TAG/
 rm rendered/$TAG/values.tmpl.yaml
 rm balfolk_music/values.yaml
+
+ls rendered/$TAG
