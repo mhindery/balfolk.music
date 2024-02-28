@@ -76,6 +76,10 @@ jobs:
         run: pytest
 
   docker:
+    needs: [
+      linter,
+      pytest
+    ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -105,6 +109,9 @@ jobs:
           context: .
 
   helm_deploy:
+    needs: [
+      docker
+    ]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -117,7 +124,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.GH_TOKEN }}
         with:
-          source_file: 'server_config/helm/rendered/'
+          source_file: 'server_config/helm/rendered/${{ github.ref_name }}'
           destination_repo: 'mhindery/argo'
           destination_folder: 'webapp1'
           user_email: 'mathieu.hinderyckx@gmail.com'
