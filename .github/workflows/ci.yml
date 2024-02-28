@@ -129,4 +129,4 @@ jobs:
           destination_folder: 'webapp1'
           user_email: 'mathieu.hinderyckx@gmail.com'
           user_name: 'mhindery'
-          commit_message: 'webapp1 release version'
+          commit_message: 'webapp1 release version ${{ github.ref_name }}'
