@@ -117,7 +117,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.GH_TOKEN }}
         with:
-          source_file: 'server_config/helm/rendered'
+          source_file: 'server_config/helm/rendered/'
           destination_repo: 'mhindery/argo'
           destination_folder: 'webapp1'
           user_email: 'mathieu.hinderyckx@gmail.com'
