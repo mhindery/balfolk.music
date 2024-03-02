@@ -31,3 +31,4 @@ requests
 django-ical
 drf-orjson-renderer
 django-filter
+django-brotli
