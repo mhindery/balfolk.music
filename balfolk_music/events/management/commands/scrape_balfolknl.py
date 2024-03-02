@@ -31,7 +31,7 @@ def get_timestamps(input_string):
     return start_ts.time(), end_ts.time()
 
 
-def get_entry_data(url):
+def get_entry_data(url, balfolk_events_by_id):
     try:
         soup = fetch_site(url)
         meta = soup.find(class_="meta")
@@ -52,7 +52,7 @@ def get_entry_data(url):
             return
 
         date_str = event_site_header.text.split(" |")[0]
-        event_date = arrow.get(date_str, "DD-MM-YYYY").datetime
+        event_date = arrow.get(date_str, "DD-MM-YYYY").date()
 
         name = meta.h2.get_text()
         description = meta.p.get_text()
@@ -107,7 +107,7 @@ def get_entry_data(url):
 
         pricing = soup.find(string=re.compile("Entree: ")).parent.parent.text.replace("Entree: ", "").strip()
 
-        event = event_cls.objects.filter(source=Event.Source.BALFOLK_NL, balfolknl_id=url).first()
+        event = balfolk_events_by_id.get(url)
         if not event:
             event = event_cls(source=Event.Source.BALFOLK_NL, balfolknl_id=url)
 
@@ -130,15 +130,10 @@ def get_entry_data(url):
         event.facebook = facebook
         event.organizer = organizer
 
-        if event.id:
-            event.save()
-        else:
-            event.save()
-            event.save()
+        event.save()
 
-        event.dates.clear()
-        d, _ = EventDate.objects.get_or_create(date=event_date)
-        event.dates.add(d)
+        d = EventDate.get_event_date(event_date)
+        event.dates.set([d])
         event.save()
 
         print(f"Processed {event}")
@@ -157,5 +152,7 @@ def get_agenda_entries() -> list[str]:
 
 
 def scrape_balfolknl_data():
+    balfolk_events_by_id = {obj.balfolknl_id: obj for obj in Event.objects.filter(source=Event.Source.BALFOLK_NL)}
+
     for entry in tqdm(get_agenda_entries()):
-        get_entry_data(entry)
+        get_entry_data(entry, balfolk_events_by_id)

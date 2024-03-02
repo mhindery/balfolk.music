@@ -9,7 +9,7 @@ from balfolk_music.events.models import Event, EventDate, Festival
 
 
 def fetch_from_folkbalbend(url):
-    return requests.get(url, timeout=(2, 20)).json()
+    return requests.get(url, timeout=(4, 20)).json()
 
 
 def get_start_timestamp(entry):
@@ -110,7 +110,7 @@ def lookup_existing_festival(entry):
     return possible_match
 
 
-def create_object(entry):
+def create_object(entry, balfolk_events_by_id):
     if " Dag " in entry["name"]:
         entry["name"] = entry["name"].split(" Dag ")[0]
 
@@ -165,7 +165,7 @@ def create_object(entry):
 
         dates_to_add = []
         for d in entry["dates"]:
-            date_obj, _ = EventDate.objects.get_or_create(date=arrow.get(d).datetime)
+            date_obj = EventDate.get_event_date(arrow.get(d).date())
             dates_to_add.append(date_obj)
         event.dates.set(set(dates_to_add))
         event.save()
@@ -191,5 +191,7 @@ def yield_entries():
 
 
 def scrape_folkbalbende_data():
+    balfolk_events_by_id = {obj.balfolknl_id: obj for obj in Event.objects.filter(source=Event.Source.BALFOLK_NL)}
+
     for entry in yield_entries():
-        create_object(entry)
+        create_object(entry, balfolk_events_by_id)

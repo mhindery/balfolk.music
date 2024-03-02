@@ -5,28 +5,24 @@ from tqdm import tqdm
 from balfolk_music.events.models import Ball, Course, Event, EventDate, Festival
 
 
-def process_entry(entry):
+def process_entry(entry, balfolk_events_by_id, folkbalbende_events_by_id, folkdancepage_events_by_id):
     if "start" not in entry:
         return
 
     event = None
 
     if entry.get("organisation", "") == "balfolk.nl":
-        event = Event.objects.filter(source=Event.Source.BALFOLK_NL, balfolknl_id=entry["links"][0]).first()
+        event = balfolk_events_by_id.get(entry["links"][0])
 
     elif any("folkbalbende" in link for link in entry["links"]):
         f_id = 0
         for link in entry["links"]:
             if "folkbalbende" in link:
                 f_id = int(link.split("/")[-1])
-        event = Event.objects.filter(source=Event.Source.FOLKBALBENDE, folkbende_id=f_id).first()
+        event = folkbalbende_events_by_id.get(f_id)
 
     else:
-        event = Event.objects.filter(
-            source=Event.Source.FOLKDANCE_PAGE,
-            name=entry["name"],
-            folkdancepage_id=entry["name"] + "_" + entry["start"],
-        ).first()
+        event = folkdancepage_events_by_id.get(entry["name"] + "_" + entry["start"])
 
     if event:
         if "festival" in event.name.lower() or "festival" in event.site.lower() or "festival" in entry["name"].lower():
@@ -56,10 +52,11 @@ def process_entry(entry):
         except Exception as e:
             print(e)
 
-    event.start_timestamp = arrow.get(entry["start"]).time()
-    event.end_timestamp = arrow.get(entry["end"]).time()
-    event.starting_datetime = arrow.get(entry["start"]).datetime
-    event.ending_datetime = arrow.get(entry["end"]).datetime
+    start_dt = arrow.get(entry["start"])
+    end_dt = arrow.get(entry["end"])
+
+    event.start_timestamp = start_dt.time()
+    event.end_timestamp = end_dt.time()
 
     event.city = entry["city"]
 
@@ -80,38 +77,31 @@ def process_entry(entry):
     if not event.organizer:
         event.organizer = ""
 
-    if event.country == "UK":
-        event.country = "GB"
-
     try:
-        if event.id:
-            event.save()
-        else:
-            event.save()
-            event.save()
+        event.save()
     except Exception as e:
         print(e)
 
     dates_to_add = []
 
     if event.event_type == Event.Type.FESTIVAL:
-        for da in arrow.Arrow.range("day", arrow.get(entry["start"]), arrow.get(entry["end"])):
-            d, _ = EventDate.objects.get_or_create(date=da.date())
-            dates_to_add.append(d)
-        d, _ = EventDate.objects.get_or_create(date=arrow.get(entry["start"]).date())
-        dates_to_add.append(d)
-        d, _ = EventDate.objects.get_or_create(date=arrow.get(entry["end"]).date())
-        dates_to_add.append(d)
+        for da in arrow.Arrow.range("day", start_dt, end_dt):
+            dates_to_add.append(EventDate.get_event_date(da.date()))
     else:
-        d, _ = EventDate.objects.get_or_create(date=arrow.get(entry["start"]).date())
-        dates_to_add.append(d)
+        dates_to_add.append(EventDate.get_event_date(start_dt.date()))
 
-    event.dates.set(set(dates_to_add))
-
-    event.save()
+    if len(event.dates.all()) != len(dates_to_add):
+        event.dates.set(set(dates_to_add))
+        event.save()
 
 
 def scrape_folkdance_data():
-    entries = requests.get("https://folkdance.page/index.json?styles=balfolk&date=all").json()
-    for entry in tqdm(entries["events"][::-1]):
-        process_entry(entry)
+    # entries = requests.get("https://folkdance.page/index.json?styles=balfolk&date=all").json()
+
+    folkbalbende_events_by_id = {obj.folkbende_id: obj for obj in Event.objects.filter(source=Event.Source.FOLKBALBENDE)}
+    balfolk_events_by_id = {obj.balfolknl_id: obj for obj in Event.objects.filter(source=Event.Source.BALFOLK_NL)}
+    folkdancepage_events_by_id = {obj.folkdancepage_id: obj for obj in Event.objects.filter(source=Event.Source.FOLKDANCE_PAGE)}
+
+    entries = requests.get("https://folkdance.page/index.json?styles=balfolk").json()
+    for entry in tqdm(entries["events"]):
+        process_entry(entry, balfolk_events_by_id, folkbalbende_events_by_id, folkdancepage_events_by_id)

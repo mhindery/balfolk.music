@@ -20,6 +20,18 @@ class EventDate(models.Model):
     def __str__(self) -> str:
         return self.date.isoformat()
 
+    @classmethod
+    def get_all_by_date(cls):
+        return {obj.date: obj for obj in cls.objects.all()}
+
+    @classmethod
+    def get_event_date(cls, date):
+        if not hasattr(cls, "cache"):
+            cls.cache = cls.get_all_by_date()
+        if not cls.cache.get(date, None):
+            cls.cache[date] = EventDate.objects.create(date=date)
+        return cls.cache[date]
+
 
 class Event(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
@@ -37,7 +49,7 @@ class Event(models.Model):
     ending_datetime = models.DateTimeField(null=True)
     starting_datetime = models.DateTimeField(null=True)
 
-    def check_dates(self):
+    def add_overflow_date(self):
         # Add a date for the day it overflows into in case for an ending time of a ball being e.g. 1:30 on the night
         if len(self.dates.all()) == 1 and self.end < self.start:
             date_obj, _ = EventDate.objects.get_or_create(date=arrow.get(self.dates.first().date).shift(days=1).datetime)
@@ -88,8 +100,10 @@ class Event(models.Model):
     def fill_country(self):
         if self.folkbende_id and not self.country:
             self.country = "BE"
+            return
         if self.balfolknl_id and not self.country:
             self.country = "NL"
+            return
         if self.city and not self.country:
             if self.city in [
                 "Leuven",
@@ -220,8 +234,11 @@ class Event(models.Model):
         if self.id:
             self.ending_datetime = self.end
             self.starting_datetime = self.start
-            self.check_dates()
-        self.fill_country()
+            self.add_overflow_date()
+        if self.country == "UK":
+            self.country = "GB"
+        if not self.country:
+            self.fill_country()
         if self.country and len(self.country) > 2:
             self.correct_country_to_alpha_2()
         return super().save(*args, **kwargs)
