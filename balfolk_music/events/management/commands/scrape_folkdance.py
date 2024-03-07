@@ -21,8 +21,8 @@ def process_entry(entry, balfolk_events_by_id, folkbalbende_events_by_id, folkda
                 f_id = int(link.split("/")[-1])
         event = folkbalbende_events_by_id.get(f_id)
 
-    else:
-        event = folkdancepage_events_by_id.get(entry["name"] + "_" + entry["start"])
+    if not event:
+        event = folkdancepage_events_by_id.get(entry["name"] + "_" + arrow.get(entry["start"]).date().isoformat())
 
     if event:
         if "festival" in event.name.lower() or "festival" in event.site.lower() or "festival" in entry["name"].lower():
@@ -40,7 +40,7 @@ def process_entry(entry, balfolk_events_by_id, folkbalbende_events_by_id, folkda
 
             event = event_cls(
                 source=Event.Source.FOLKDANCE_PAGE,
-                folkdancepage_id=entry["name"] + "_" + entry["start"],
+                folkdancepage_id=entry["name"] + "_" + arrow.get(entry["start"]).date().isoformat(),
                 name=entry["name"],
                 description=entry.get("details", ""),
                 pricing=entry.get("price", ""),
@@ -77,6 +77,11 @@ def process_entry(entry, balfolk_events_by_id, folkbalbende_events_by_id, folkda
     if not event.organizer:
         event.organizer = ""
 
+    if event.name.lower() == "balhalla":
+        from .scrape_balhalla import update_balhalla_event
+
+        update_balhalla_event(event)
+
     try:
         event.save()
     except Exception as e:
@@ -99,9 +104,9 @@ def scrape_folkdance_data():
     # entries = requests.get("https://folkdance.page/index.json?styles=balfolk&date=all").json()
 
     folkbalbende_events_by_id = {obj.folkbende_id: obj for obj in Event.objects.filter(source=Event.Source.FOLKBALBENDE)}
-    balfolk_events_by_id = {obj.balfolknl_id: obj for obj in Event.objects.filter(source=Event.Source.BALFOLK_NL)}
+    balfolknl_events_by_id = {obj.balfolknl_id: obj for obj in Event.objects.filter(source=Event.Source.BALFOLK_NL)}
     folkdancepage_events_by_id = {obj.folkdancepage_id: obj for obj in Event.objects.filter(source=Event.Source.FOLKDANCE_PAGE)}
 
     entries = requests.get("https://folkdance.page/index.json?styles=balfolk").json()
     for entry in tqdm(entries["events"]):
-        process_entry(entry, balfolk_events_by_id, folkbalbende_events_by_id, folkdancepage_events_by_id)
+        process_entry(entry, balfolknl_events_by_id, folkbalbende_events_by_id, folkdancepage_events_by_id)

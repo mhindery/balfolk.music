@@ -28,7 +28,7 @@
         <v-list nav>
           <v-list-item prepend-icon="mdi-tent" title="Festivals" value="festivals"
             :to="{ name: 'FestivalList' }"></v-list-item>
-          <v-list-item prepend-icon="mdi-party-popper" title="Bals" value="bals" :to="{ name: 'BallList' }"></v-list-item>
+          <v-list-item prepend-icon="mdi-party-popper" title="Balls" value="balls" :to="{ name: 'BallList' }"></v-list-item>
           <v-list-item prepend-icon="mdi-school" title="Courses / Workshops" value="courses_workshops"
             :to="{ name: 'CourseList' }"></v-list-item>
           <v-list-item prepend-icon="mdi-calendar-blank" title="Calendar" value="calendar"

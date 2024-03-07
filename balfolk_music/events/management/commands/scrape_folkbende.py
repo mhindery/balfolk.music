@@ -9,7 +9,7 @@ from balfolk_music.events.models import Event, EventDate, Festival
 
 
 def fetch_from_folkbalbend(url):
-    return requests.get(url, timeout=(4, 20)).json()
+    return requests.get(url, timeout=(20, 30)).json()
 
 
 def get_start_timestamp(entry):
@@ -191,7 +191,7 @@ def yield_entries():
 
 
 def scrape_folkbalbende_data():
-    balfolk_events_by_id = {obj.balfolknl_id: obj for obj in Event.objects.filter(source=Event.Source.BALFOLK_NL)}
+    balfolk_events_by_id = {obj.folkbende_id: obj for obj in Event.objects.filter(source=Event.Source.BALFOLK_NL)}
 
     for entry in yield_entries():
         create_object(entry, balfolk_events_by_id)

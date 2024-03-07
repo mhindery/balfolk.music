@@ -29,7 +29,7 @@ class EventDate(models.Model):
         if not hasattr(cls, "cache"):
             cls.cache = cls.get_all_by_date()
         if not cls.cache.get(date, None):
-            cls.cache[date] = EventDate.objects.create(date=date)
+            cls.cache[date], _ = EventDate.objects.get_or_create(date=date)
         return cls.cache[date]
 
 

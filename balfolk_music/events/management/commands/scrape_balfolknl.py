@@ -136,7 +136,7 @@ def get_entry_data(url, balfolk_events_by_id):
         event.dates.set([d])
         event.save()
 
-        print(f"Processed {event}")
+        # print(f"Processed {event}")
     except Exception as e:
         print(url)
         print(e)
