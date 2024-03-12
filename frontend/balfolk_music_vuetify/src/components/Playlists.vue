@@ -18,7 +18,7 @@ const objects = ref([]);
 async function fetchData() {
     var response = await axios.get("/api/playlists/");
     objects.value = response.data;
-    console.log(objects.value);
+    // console.log(objects.value);
 }
 
 // load initial data

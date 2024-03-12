@@ -16,7 +16,7 @@ const viewmodes = ['month', 'week', 'day'];
 const loading = ref(true);
 const showAdjacent = ref(true);
 
-const countriesSelected = ref([{ alpha_2: 'BE', name: 'Belgium' }]);
+const countriesSelected = ref(['BE']);
 
 function getColor(event) {
     if (event.event_type == "ball") {
@@ -62,7 +62,7 @@ function getEndDate(event) {
 async function getEvents(start, end) {
     loading.value = true;
     let event_types = eventTypeSelected.value.join('&event_type=');
-    let countries = countriesSelected.value.map((x) => x.alpha_2).join('&country=');
+    let countries = countriesSelected.value.join('&country=');
     var response = await axios.get("/events/calendar/?event_type=" + event_types + '&country=' + countries);
 
     events.value = [];

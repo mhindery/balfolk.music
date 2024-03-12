@@ -21,19 +21,19 @@
             </template>
         </v-select>
 
-        <p class="pb-4">You can copy the link to the calendar by clicking the button below. You can subscribe to this
-            calendar as a feed in your own calendar application (e.g. in Google calendar of your own account).</p>
+        <p class="pb-4">You can copy the link to the calendar by clicking the button below. You can then subscribe to this
+            calendar as a feed in your own calendar application (e.g. in Google calendar of your own account). Updates on events will be tracked automatically by your calendar application.</p>
         <v-btn size="large" prepend-icon="mdi-content-copy" block color="blue" @click="copyText">Copy Ical link to
             clipboard</v-btn>
 
-        <br>
+        <!-- <br>
         <v-divider></v-divider>
 
         <p class="py-4">You can download an .ics file by clicking the button below. This file contains all events from this
             site at this point in time.</p>
         <a style="text-decoration: none; color: inherit;" :href="icalLink">
             <v-btn size="large" prepend-icon="mdi-file-download-outline" block color="blue">Download ICS file</v-btn>
-        </a>
+        </a> -->
     </v-sheet>
 </template>
 
@@ -48,7 +48,8 @@ const countriesSelected = ref(['BE']);
 
 function constructIcalLink(selectedValues) {
     let event_types = eventTypeSelected.value.join(',');
-    icalLink.value = location.protocol + '//' + location.hostname + '/events/feed.ics' + '?event_type=' + event_types;
+    let countries = countriesSelected.value.join('&country=');
+    icalLink.value = location.protocol + '//' + location.hostname + '/events/feed.ics' + '?event_type=' + event_types + '&country=' + countries;
 }
 
 constructIcalLink()
