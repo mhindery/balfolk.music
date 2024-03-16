@@ -1,5 +1,8 @@
+import urllib.parse
+
 import arrow
 import pycountry
+import requests
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
@@ -182,31 +185,88 @@ class Event(models.Model):
     def __str__(self) -> str:
         return f"{self.get_event_type_display()}: {self.name}"
 
-    def fill_geo_info(self):
-        import urllib.parse
+    def forward_geocode_lookup(self, debug=False) -> bool:
+        """From address to coordinates"""
 
-        import pycountry
-        import requests
+        if debug:
+            import ipdb  # noqa
 
-        if self.longitude and self.lattitude:
-            try:
-                data = requests.get(
-                    url="http://api.geonames.org/addressJSON?lat={lat}&lng={lng}&username=mhindery".format(
-                        lat=self.lattitude,
-                        lng=self.longitude,
-                    ),
-                    timeout=(2, 10),
-                ).json()
-            except Exception as e:
-                print(e)
-                return
-            if "address" in data:
-                address = data["address"]
-                country = pycountry.countries.get(alpha_2=address["countryCode"])
-                self.country = country.alpha_3
-                self.city = address["locality"]
-                self.address = f'{address["street"]} {address["houseNumber"]}, {address["postalcode"]} {address["locality"]}'
-        if self.address:
+            ipdb.set_trace()  # noqa
+
+        geocode_api_key = "65f5b1429622e613256646zqpd7d586"
+        url, data = None, None
+        try:
+            query = urllib.parse.quote(self.address.replace("\n", " ") + " " + self.get_country_display())
+            url = f"https://geocode.maps.co/search?q={query}&api_key={geocode_api_key}&format=json"
+            data = requests.get(url).json()
+            if data:
+                info = data[0]
+                self.longitude = info["lon"]
+                self.lattitude = info["lat"]
+                print(f"Succesfully forward_geocoded event {self.id}")
+                return True
+        except Exception as e:
+            print(e, url)
+            print(data)
+
+        return False
+
+    def reverse_geocode_lookup(self, debug=False) -> bool:
+        """From coordinates to address"""
+
+        if debug:
+            import ipdb  # noqa
+
+            ipdb.set_trace()  # noqa
+
+        geocode_api_key = "65f5b1429622e613256646zqpd7d586"
+        url, data = None, None
+        try:
+            url = f"https://geocode.maps.co/search?lat={self.lattitude}&lon={self.longitude}&api_key={geocode_api_key}&format=json"
+            data = requests.get(url).json()
+            if data:
+                self.address = "\n".join(
+                    [data["address"]["road"] + " " + data["address"]["house_number"], data["address"]["postcode"] + " " + data["address"]["city"], data["address"]["state"]]
+                )
+                self.city = data["address"]["city"]
+                self.country = data["address"]["country_code"].upper()
+                print(f"Succesfully reverse_geocoded event {self.id}")
+                return True
+        except Exception as e:
+            print(e, url)
+            print(data)
+
+        return False
+
+    def fill_geo_info(self) -> bool:
+
+        did_update = False
+
+        if self.address and not all((self.longitude, self.lattitude)):
+            did_update = self.forward_geocode_lookup()
+
+        elif all((self.longitude, self.lattitude)) and not self.address:
+            did_update = self.reverse_geocode_lookup()
+
+            # if self.longitude and self.lattitude:
+            #     try:
+            #         data = requests.get(
+            #             url="http://api.geonames.org/addressJSON?lat={lat}&lng={lng}&username=mhindery".format(
+            #                 lat=self.lattitude,
+            #                 lng=self.longitude,
+            #             ),
+            #             timeout=(2, 10),
+            #         ).json()
+            #     except Exception as e:
+            #         print(e)
+            #         return
+            #     if "address" in data:
+            #         address = data["address"]
+            #         country = pycountry.countries.get(alpha_2=address["countryCode"])
+            #         self.country = country.alpha_3
+            #         self.city = address["locality"]
+            #         self.address = f'{address["street"]} {address["houseNumber"]}, {address["postalcode"]} {address["locality"]}'
+            # if self.address:
             try:
                 data = requests.get(
                     url="http://api.geonames.org/geoCodeAddressJSON?q={q}&username=mhindery".format(
@@ -226,9 +286,11 @@ class Event(models.Model):
         if self.address and not self.city:
             self.city = self.address.split(" ")[-1]
 
+        return did_update
+
     def save(self, *args, **kwargs):
-        # if not all([self.lattitude, self.longitude, self.address, self.city, self.country]):
-        #     self.fill_geo_info()
+        if not all([self.lattitude, self.longitude, self.address, self.city, self.country]):
+            self.fill_geo_info()
         #     if not self.country:
         #         self.country = 'BEL'
         if self.id:

@@ -8,9 +8,6 @@ from balfolk_music.events.models import Ball, Course, Event, Festival
 User = get_user_model()
 
 
-list_display = ["name", "starting_datetime", "city", "country", "source", "visible"]
-
-
 class EventYearFilter(admin.SimpleListFilter):
     title = _("year")
     parameter_name = "year"
@@ -25,13 +22,22 @@ class EventYearFilter(admin.SimpleListFilter):
         return queryset
 
 
-@admin.register(Festival)
-class FestivalAdmin(admin.ModelAdmin):
-    list_display = list_display
+class EventAdminMixin:
+    list_display = ["name", "starting_datetime", "city", "country", "source", "visible", "has_address_info"]
     list_filter = ["visible", "country"]
     readonly_fields = [
         "created_at",
+        "starting_datetime",
+        "ending_datetime",
     ]
+
+    @admin.display(description="Has address info", boolean=True)
+    def has_address_info(self, obj):
+        return all([obj.address, obj.lattitude, obj.longitude])
+
+
+@admin.register(Festival)
+class FestivalAdmin(EventAdminMixin, admin.ModelAdmin):
     search_fields = ["name"]
     ordering = ["-starting_datetime"]
 
@@ -42,12 +48,7 @@ class FestivalAdmin(admin.ModelAdmin):
 
 
 @admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
-    list_display = list_display
-    list_filter = ["visible", "country"]
-    readonly_fields = [
-        "created_at",
-    ]
+class CourseAdmin(EventAdminMixin, admin.ModelAdmin):
     search_fields = ["name"]
     ordering = ["-starting_datetime"]
 
@@ -55,10 +56,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 
 @admin.register(Ball)
-class BallAdmin(admin.ModelAdmin):
-    list_display = list_display
-    list_filter = ["visible", "country"]
-    readonly_fields = ["created_at", "starting_datetime", "ending_datetime"]
+class BallAdmin(EventAdminMixin, admin.ModelAdmin):
     search_fields = ["name"]
     ordering = ["-starting_datetime"]
 

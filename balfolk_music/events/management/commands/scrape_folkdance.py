@@ -6,8 +6,10 @@ from balfolk_music.events.models import Ball, Course, Event, EventDate, Festival
 
 
 def process_entry(entry, balfolk_events_by_id, folkbalbende_events_by_id, folkdancepage_events_by_id):
+    new = False
+
     if "start" not in entry:
-        return
+        return new
 
     event = None
 
@@ -51,6 +53,9 @@ def process_entry(entry, balfolk_events_by_id, folkbalbende_events_by_id, folkda
                 event.balfolknl_id = entry["links"][0]
         except Exception as e:
             print(e)
+            return new
+
+        new = True
 
     start_dt = arrow.get(entry["start"])
     end_dt = arrow.get(entry["end"])
@@ -99,6 +104,8 @@ def process_entry(entry, balfolk_events_by_id, folkbalbende_events_by_id, folkda
         event.dates.set(set(dates_to_add))
         event.save()
 
+    return new
+
 
 def scrape_folkdance_data():
     # entries = requests.get("https://folkdance.page/index.json?styles=balfolk&date=all").json()
@@ -107,6 +114,10 @@ def scrape_folkdance_data():
     balfolknl_events_by_id = {obj.balfolknl_id: obj for obj in Event.objects.filter(source=Event.Source.BALFOLK_NL)}
     folkdancepage_events_by_id = {obj.folkdancepage_id: obj for obj in Event.objects.filter(source=Event.Source.FOLKDANCE_PAGE)}
 
+    count = 0
     entries = requests.get("https://folkdance.page/index.json?styles=balfolk").json()
     for entry in tqdm(entries["events"]):
-        process_entry(entry, balfolknl_events_by_id, folkbalbende_events_by_id, folkdancepage_events_by_id)
+        if process_entry(entry, balfolknl_events_by_id, folkbalbende_events_by_id, folkdancepage_events_by_id):
+            count += 1
+
+    print(f"Processed {count} new entries")

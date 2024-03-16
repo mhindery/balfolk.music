@@ -32,6 +32,8 @@ def get_timestamps(input_string):
 
 
 def get_entry_data(url, balfolk_events_by_id):
+    new = False
+
     try:
         soup = fetch_site(url)
         meta = soup.find(class_="meta")
@@ -110,6 +112,7 @@ def get_entry_data(url, balfolk_events_by_id):
         event = balfolk_events_by_id.get(url)
         if not event:
             event = event_cls(source=Event.Source.BALFOLK_NL, balfolknl_id=url)
+            new = True
 
         event.balfolknl_id = url
         event.site = url
@@ -141,6 +144,8 @@ def get_entry_data(url, balfolk_events_by_id):
         print(url)
         print(e)
 
+    return new
+
 
 def get_agenda_entries() -> list[str]:
     agenda_response = requests.get("https://www.balfolk.nl/agenda/")
@@ -154,5 +159,9 @@ def get_agenda_entries() -> list[str]:
 def scrape_balfolknl_data():
     balfolk_events_by_id = {obj.balfolknl_id: obj for obj in Event.objects.filter(source=Event.Source.BALFOLK_NL)}
 
+    count = 0
     for entry in tqdm(get_agenda_entries()):
-        get_entry_data(entry, balfolk_events_by_id)
+        if get_entry_data(entry, balfolk_events_by_id):
+            count += 1
+
+    print(f"Processed {count} new entries")
